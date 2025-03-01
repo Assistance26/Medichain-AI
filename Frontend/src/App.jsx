@@ -1,18 +1,24 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import SymptomChecker from "./components/SymptomChecker";
+import AboutUs from "./components/AboutUs";
+import Services from "./pages/Services";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <h1>MediChain AI</h1>
-      </div>
+      <Navbar />
+      <main className="min-h-screen bg-gray-50">
+        <Routes>
+          <Route path="/" element={<SymptomChecker />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/services" element={<Services />} />
+        </Routes>
+      </main>
+      <Footer />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
