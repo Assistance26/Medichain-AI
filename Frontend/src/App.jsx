@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import SymptomChecker from "./components/SymptomChecker";
 import AboutUs from "./components/AboutUs";
 import Services from "./pages/Services";
+import VideoCall from "./components/VideoCall";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/" element={<SymptomChecker />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/video-call" element={<VideoCall />} />
         </Routes>
       </main>
       <Footer />
