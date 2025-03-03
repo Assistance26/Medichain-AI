@@ -13,7 +13,7 @@ function App() {
       <main className="min-h-screen bg-gray-50">
         <Routes>
           <Route path="/" element={<SymptomChecker />} />
-          <Route path="/about" element={<AboutUs />} />
+          <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/services" element={<Services />} />
           <Route path="/video-call" element={<VideoCall />} />
         </Routes>
