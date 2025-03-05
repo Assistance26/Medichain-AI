@@ -1,59 +1,62 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle login logic here (e.g., send data to backend API)
-    console.log("Login with: ", email, password);
-    navigate("/");
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    if (user && user.email === formData.email && user.password === formData.password) {
+      localStorage.setItem("isAuthenticated", "true"); // Set auth status
+      navigate("/");
+    } else {
+      alert("Invalid credentials");
+    }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md border border-gray-200">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Welcome Back</h2>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white p-3 rounded-lg font-semibold hover:bg-blue-600 transition-all duration-300"
-          >
-            Login
-          </button>
-        </form>
-        <p className="text-center mt-4 text-gray-600">
-          Don't have an account? {" "}
-          <Link to="/signup" className="text-blue-500 font-medium hover:underline">
-            Sign up
-          </Link>
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h2 className="text-2xl font-semibold text-center mb-4">Login</h2>
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full p-2 mb-3 border rounded-md"
+          required
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full p-2 mb-3 border rounded-md"
+          required
+        />
+
+        <button type="submit" className="bg-primary text-white w-full p-2 rounded-md">
+          Login
+        </button>
+
+        <p className="text-center mt-3 text-sm">
+          Don't have an account?{" "}
+          <a href="/signup" className="text-primary underline">
+            Sign Up
+          </a>
         </p>
-      </div>
+      </form>
     </div>
   );
 };

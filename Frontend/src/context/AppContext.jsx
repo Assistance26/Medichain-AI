@@ -1,16 +1,16 @@
-import { createContext, useState, useContext } from "react";
+// import { createContext, useState, useContext } from "react";
 
-const AppContext = createContext();
+// const AppContext = createContext();
 
-export const AppContextProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Example global state
+// export const AppContextProvider = ({ children }) => {
+//   const [user, setUser] = useState(null); // Example global state
 
-  return (
-    <AppContext.Provider value={{ user, setUser }}>
-      {children}
-    </AppContext.Provider>
-  );
-};
+//   return (
+//     <AppContext.Provider value={{ user, setUser }}>
+//       {children}
+//     </AppContext.Provider>
+//   );
+// };
 
-// Custom hook for easier access
-export const useAppContext = () => useContext(AppContext);
+// // Custom hook for easier access
+// export const useAppContext = () => useContext(AppContext);
