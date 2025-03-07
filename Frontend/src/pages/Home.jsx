@@ -14,18 +14,22 @@ const services = [
   {
     name: "AI Doctor",
     icon: <AiOutlineRobot className="text-4xl text-white" />,
+    path: "/aidoctor",
   },
   {
     name: "Symptoms Checker",
     icon: <MdOutlineMedicalServices className="text-4xl text-white" />,
+    path: "/symptom-checker",
   },
   {
     name: "Health Score",
     icon: <MdHealthAndSafety className="text-4xl text-white" />,
+    path: "/health-score",
   },
   {
     name: "AI Cost Planning",
     icon: <FaMoneyCheckAlt className="text-4xl text-white" />,
+    path: "/cost-planning",
   },
 ];
 
@@ -133,10 +137,13 @@ const Home = () => {
                 whileHover={{ scale: 1.1 }}
                 className="bg-primary text-white p-6 text-center rounded-lg shadow-md"
               >
-                <div className="flex flex-col items-center">
+                <Link
+                  to={service.path || "#"}
+                  className="flex flex-col items-center"
+                >
                   {service.icon}
                   <p className="mt-2 font-semibold">{service.name}</p>
-                </div>
+                </Link>
               </motion.div>
             ))}
           </div>

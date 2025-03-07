@@ -22,7 +22,11 @@ const Navbar = () => {
   const links = ["Home", "About", "Services", "Doctors", "Appointment", "Contact"];
 
   return (
-    <motion.nav initial={{ y: -50 }} animate={{ y: 0 }} className="bg-primary text-white shadow-md">
+    <motion.nav
+      initial={{ y: -50 }}
+      animate={{ y: 0 }}
+      className={`fixed top-0 left-0 w-full z-50 bg-primary text-white shadow-md ${isOpen ? "pb-10" : ""}`}
+    >
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
         <h1 className="text-lg font-semibold">MediChanAI</h1>
 
@@ -52,7 +56,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Button */}
-        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden">
+        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden z-50">
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
@@ -64,14 +68,14 @@ const Navbar = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="md:hidden bg-primary text-white absolute top-16 left-0 w-full py-4 shadow-lg"
+            className="md:hidden bg-white/10 backdrop-blur-lg text-black absolute top-16 left-0 w-full py-4 shadow-lg border-t border-white/20 z-50"
           >
             <div className="flex flex-col items-center space-y-4">
               {links.map((item) => (
                 <Link
                   key={item}
                   to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
-                  className="text-sm font-medium hover:text-accent transition-all duration-200"
+                  className="text-sm font-medium hover:text-accent transition-all duration-200 text-black"
                   onClick={() => setIsOpen(false)}
                 >
                   {item}

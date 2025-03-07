@@ -64,15 +64,7 @@ const About = () => {
         </div>
       </div>
 
-      {/* Footer - Positioned at the Bottom with Animation */}
-      <motion.footer
-        className="bg-gray-800 text-white text-center py-4 mt-auto"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.6 }}
-      >
-        <p>© 2025 MediChanAI. All rights reserved.</p>
-      </motion.footer>
+      
     </motion.div>
   );
 };
