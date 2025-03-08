@@ -6,4 +6,11 @@ export default defineConfig({
   optimizeDeps: {
     include: ["twilio-video"],  // Ensure Twilio Video is bundled properly
   },
+  publicDir: 'public',
+  server: {
+    fs: {
+      // Allow serving files from one level up to the project root
+      allow: ['..']
+    }
+  }
 })

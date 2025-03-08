@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const bodyParser = require("body-parser");
 const videoRoutes = require("./routes/videoRoutes");
 
 const app = express();
@@ -24,13 +25,14 @@ app.use(
 
 // ✅ Middleware to parse JSON requests
 app.use(express.json());
+app.use(bodyParser.json());
     
-// ✅ Twilio Video Call Routes
-app.use("/api/", videoRoutes);
+// ✅ Routes
+app.use("/api/video", videoRoutes);
 
 // 🌍 Health Check Route
 app.get("/", (req, res) => {
-    res.json({ success: true, message: "🚀 Express + Twilio Video Backend is Running!" });
+    res.json({ success: true, message: "🚀 Express Backend is Running!" });
 });
 
 // 🌐 Global Error Handling Middleware
