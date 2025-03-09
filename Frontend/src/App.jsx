@@ -1,25 +1,37 @@
 import { Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import SymptomChecker from "./components/SymptomChecker";
-import AboutUs from "./components/AboutUs";
+import MainLayout from "./layouts/MainLayout";
+import Home from "./pages/Home";
+import About from "./pages/About";
 import Services from "./pages/Services";
-import VideoCall from "./components/VideoCall";
+import Doctors from "./pages/Doctors";
+import Appointment from "./pages/Appointment";
+import Contact from "./pages/Contact";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import AiDoctor from "./pages/AiDoctor";
+import HealthScore from "./pages/HealthScore"; 
+import CostPlanning from "./pages/CostPlanning.jsx"; 
+import SymptomChecker from "./pages/SymptomChecker.jsx";
 
 function App() {
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen bg-gray-50">
-        <Routes>
-          <Route path="/" element={<SymptomChecker />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/video-call" element={<VideoCall />} />
-        </Routes>
-      </main>
-      <Footer />
-    </>
+    <MainLayout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/doctors" element={<Doctors />} />
+        <Route path="/appointment" element={<Appointment />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/aidoctor" element={<AiDoctor />} />
+        <Route path="/health-score" element={<HealthScore />} />
+        <Route path="/cost-planning" element={<CostPlanning />} />
+        <Route path="/symptom-checker" element={<SymptomChecker />} />
+
+      </Routes>
+    </MainLayout>
   );
 }
 
