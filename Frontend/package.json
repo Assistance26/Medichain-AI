@@ -16,6 +16,7 @@
     "@tensorflow/tfjs": "^4.22.0",
     "axios": "^1.8.1",
     "chart.js": "^4.4.1",
+    "emailjs-com": "^3.2.0",
     "firebase": "^11.4.0",
     "framer-motion": "^12.4.10",
     "lottie-react": "^2.4.1",
