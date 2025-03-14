@@ -1,10 +1,13 @@
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
+import LoginSelection from './pages/LoginSelection';
+
 import About from "./pages/About";
 import Services from "./pages/Services";
 import Doctors from "./pages/Doctors";
 import DoctorProfile from "./pages/DoctorProfile"; // Import this
+import DoctorRegistration from "./pages/DoctorRegistration";
 import Appointment from "./pages/Appointment";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -20,11 +23,13 @@ function App() {
     <MainLayout>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/LoginSelection" element={<LoginSelection />} />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
         <Route path="/doctors" element={<Doctors />} />
-        <Route path="/doctors/:doctorName" element={<DoctorProfile />} />{" "}
+        <Route path="/DoctorProfile" element={<DoctorProfile />} />{" "}
         {/* ✅ Fix: Dynamic Route */}
+        <Route path="/DoctorRegistration" element={<DoctorRegistration />} />
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
