@@ -53,7 +53,6 @@ app.get('/login', async(req, res) => {
     }
 });
 
-
 app.post('/DoctorSignIn', async (req, res) => {
     const {email, name, number, specialization, licenseNumber, experience, publications, password} = req.body;
     console.log(email);

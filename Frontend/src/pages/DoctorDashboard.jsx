@@ -10,13 +10,11 @@ const DoctorDashboard = () => {
   // Get doctor data from location state
   const doctor = location.state?.doctor;
 
-  // State management
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [earnings, setEarnings] = useState(0);
 
-  // Redirect if doctor data is missing
   useEffect(() => {
     if (!doctor) {
       navigate("/login");
@@ -82,9 +80,9 @@ const DoctorDashboard = () => {
               ))}
             </div>
 
-            {/* Dashboard Sections */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-              {/* Upcoming Appointments */}
+
               <div className="p-4 bg-gray-100 rounded-lg shadow-sm">
                 <h3 className="text-2xl font-semibold text-blue-600 mb-3">📅 Upcoming Appointments</h3>
                 {appointments.length > 0 ? (
