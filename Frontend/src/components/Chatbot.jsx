@@ -173,7 +173,7 @@ const Chatbot = () => {
 
         <div 
           ref={chatContainerRef} 
-          className="h-96 overflow-y-auto mb-6 p-4 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent"
+          className="h-96 overflow-y-auto mb-6 p-4 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:text-white dark:border-gray-700 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent"
         >
           <AnimatePresence>
             {chatHistory.map((chat, index) => (
@@ -244,7 +244,7 @@ const Chatbot = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowPersonaDropdown(!showPersonaDropdown)}
-              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 flex items-center justify-between"
+              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:text-white dark:bg-gray-800 shadow-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 flex items-center justify-between"
             >
               <span>{aiPersona}</span>
               <ChevronDown className={`transform transition-transform duration-200 ${showPersonaDropdown ? 'rotate-180' : ''}`} size={20} />
@@ -255,7 +255,7 @@ const Chatbot = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                  className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 dark:text-white rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
                 >
                   {personas.map((p) => (
                     <motion.button
@@ -315,7 +315,7 @@ const Chatbot = () => {
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type your message..."
-            className="flex-1 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+            className="flex-1 p-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:text-white bg-white dark:bg-gray-800 shadow-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
             disabled={aiTyping}
           />
           <motion.button
