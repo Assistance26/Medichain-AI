@@ -2,11 +2,12 @@ import { Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import LoginSelection from './pages/LoginSelection';
-
+import GlobalState from './context/AppContext';
 import About from "./pages/About";
 import Services from "./pages/Services";
 import Doctors from "./pages/Doctors";
 import DoctorProfile from "./pages/DoctorProfile"; // Import this
+import DoctorDashboard from "./pages/DoctorDashboard";
 import DoctorRegistration from "./pages/DoctorRegistration";
 import Appointment from "./pages/Appointment";
 import Contact from "./pages/Contact";
@@ -20,6 +21,7 @@ import NotFound from "./pages/NotFound";
 
 function App() {
   return (
+    <GlobalState>
     <MainLayout>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -28,6 +30,7 @@ function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/doctors" element={<Doctors />} />
         <Route path="/DoctorProfile" element={<DoctorProfile />} />{" "}
+        <Route path="/DoctorDashboard" element={<DoctorDashboard />} />
         {/* ✅ Fix: Dynamic Route */}
         <Route path="/DoctorRegistration" element={<DoctorRegistration />} />
         <Route path="/appointment" element={<Appointment />} />
@@ -41,6 +44,7 @@ function App() {
         <Route path="*" element={<NotFound />} /> {/* 404 Page Route */}
       </Routes>
     </MainLayout>
+    </GlobalState>
   );
 }
 

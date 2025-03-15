@@ -16,7 +16,7 @@ const LoginSelection = () => {
 
         <div
           className="bg-white p-6 rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition transform hover:scale-105"
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/Signup")}
         >
           <h2 className="text-2xl font-semibold text-center mb-4">Sign in as Patient</h2>
           <p className="text-center text-gray-600">Manage your health records</p>

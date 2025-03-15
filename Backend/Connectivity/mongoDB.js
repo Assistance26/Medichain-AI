@@ -1,13 +1,25 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
+    name:{
+        type: String,
+        required: true
+    },
     email:{
-        type:String,
+        type: String,
         required: true
     },
     password:{
-        type:String,
+        type: String,
         required: true
+    },
+    appointmentAt:{
+        type: String,
+        required: false
+    },
+    appointmentWith:{
+        type: String,
+        required: false
     }
 })
 
@@ -43,10 +55,19 @@ const DoctorSchema = new mongoose.Schema({
     publications:{
         type:String,
         required: true
+    },
+    appointmentAt:{
+        type:[String],
+        required: false
+    },
+    appointmentWith:{
+        type:[String],
+        required: false
     }
 
 })
 
 const User = new mongoose.model('Patient', UserSchema);
 const Doctor = new mongoose.model('Doctor', DoctorSchema);
+
 module.exports = {Doctor, User};
