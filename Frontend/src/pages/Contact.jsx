@@ -1,14 +1,11 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import emailjs from "emailjs-com";
+import axios from "axios";
 
 const Contact = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState({ email: "", message: "" });
   const [showForm, setShowForm] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -20,24 +17,22 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.email || !formData.message) {
       alert("Please fill out all fields.");
       return;
     }
-
     setSending(true);
     setAnimatePaper(true);
+    const payload = {
+      to: formData.email,  // Ensure correct key
+      subject: "Contact Form Submission",  // Add a subject
+      message: formData.message,
+    };
+
     try {
-      await emailjs.send(
-        "YOUR_SERVICE_ID",
-        "YOUR_TEMPLATE_ID",
-        {
-          email: formData.email,
-          message: formData.message,
-        },
-        "YOUR_PUBLIC_KEY"
-      );
+      const response = await axios.post("http://localhost:5000/send-email", payload);
+      console.log(response.data);
+
       setTimeout(() => {
         setSent(true);
         setAnimatePaper(false);
@@ -53,11 +48,15 @@ const Contact = () => {
 
   return (
     <motion.div
-      className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-gradient-to-br animate-gradient"
+      className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden"
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
+      onMouseEnter={() => setShowForm(true)}
     >
+      {/* Background Animation */}
+      <motion.div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-30 blur-3xl animate-pulse" />
+
       <motion.h2
         className="text-5xl font-extrabold text-white mb-4 text-center drop-shadow-lg border-b-4 border-white pb-2"
         initial={{ opacity: 0, scale: 0.8 }}
@@ -81,12 +80,12 @@ const Contact = () => {
         </motion.button>
       )}
 
-      {showForm && !sent && (
+      {(showForm && !sent) && (
         <motion.form
           onSubmit={handleSubmit}
           className="w-full max-w-lg bg-white/20 backdrop-blur-md p-8 rounded-2xl shadow-2xl border-2 border-white/40 mt-6"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, rotateY: 90 }}
+          animate={{ opacity: 1, rotateY: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <motion.div className="mb-6" whileHover={{ scale: 1.05 }}>
@@ -117,49 +116,24 @@ const Contact = () => {
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 text-lg font-semibold rounded-lg shadow-md transition-all duration-300 hover:shadow-xl"
+              disabled={sending}
             >
-              Send Message
+              {sending ? "Sending..." : "Send Message"}
             </button>
           </motion.div>
         </motion.form>
-      )}
-
-      {animatePaper && (
-        <motion.div
-          className="mt-6 p-4 bg-white rounded-lg shadow-lg"
-          initial={{ scale: 1 }}
-          animate={{ rotate: -10, scale: 0.8, y: -50, opacity: 0 }}
-          transition={{ duration: 1.5 }}
-        >
-          <p className="text-black font-bold">Message is flying...</p>
-        </motion.div>
       )}
 
       {sent && (
         <motion.div
           className="mt-6 p-4 bg-white rounded-lg shadow-lg"
           initial={{ opacity: 1, scale: 1 }}
-          animate={{ opacity: 0, scale: 0.5, y: -100 }}
+          animate={{ opacity: 0, scale: 0.5, rotateX: 180, y: -100 }}
           transition={{ duration: 1.5 }}
         >
           <p className="text-black font-bold">Message Sent!</p>
         </motion.div>
       )}
-
-      <style>
-        {`
-          @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-          .animate-gradient {
-            background: linear-gradient(-45deg, #1e3a8a, #9333ea, #3b82f6, #a855f7);
-            background-size: 300% 300%;
-            animation: gradientBG 10s ease infinite;
-          }
-        `}
-      </style>
     </motion.div>
   );
 };

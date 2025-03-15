@@ -1,26 +1,37 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user"));
     
-    if (user && user.email === formData.email && user.password === formData.password) {
-      localStorage.setItem("isAuthenticated", "true"); // Set auth status
-      navigate("/");
-    } else {
-      alert("Invalid credentials");
+    try {
+      const res = await axios.get("http://localhost:5000/login", {
+        params:{email,password}
+      });
+      if(res.data.status === "User found"){
+      console.log(res.data.user);
+      navigate('/');
+      }
+      else{
+      console.log("User doesn't exists");
+      alert("Email or password incorrect");
+      }
+    }
+    catch(e){
+        console.log("error:",e);
     }
   };
-
+  
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-96">
@@ -30,8 +41,8 @@ const Login = () => {
           type="email"
           name="email"
           placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 mb-3 border rounded-md"
           required
         />
@@ -40,8 +51,8 @@ const Login = () => {
           type="password"
           name="password"
           placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           className="w-full p-2 mb-3 border rounded-md"
           required
         />

@@ -1,20 +1,39 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const Signup = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("user", JSON.stringify(formData)); // Save user data
-    navigate("/"); // Redirect to home
+    try {
+      const res = await axios.post("http://localhost:5000/signup", {
+        email,
+        password,
+      });
+      if(res.data.status === "User Already Exists")
+        alert("User Already Exists");
+      else{
+        alert("User Account Created");
+        console.log(res.data.user);
+        navigate("/login");
+      }
+    }
+    catch(e){
+
+    }
   };
 
+  async function handleSignUp(){
+    
+  }
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-96">
@@ -24,8 +43,8 @@ const Signup = () => {
           type="email"
           name="email"
           placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 mb-3 border rounded-md"
           required
         />
@@ -34,13 +53,13 @@ const Signup = () => {
           type="password"
           name="password"
           placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           className="w-full p-2 mb-3 border rounded-md"
           required
         />
 
-        <button type="submit" className="bg-primary text-white w-full p-2 rounded-md">
+        <button type="submit" className="bg-primary text-white w-full p-2 rounded-md" onClick={() => handleSignUp}>
           Sign Up
         </button>
 

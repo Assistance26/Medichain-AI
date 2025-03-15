@@ -41,7 +41,7 @@ const Home = () => {
         <div className="text-center md:text-left">
           <h2 className="text-3xl font-bold text-gray-800">Welcome to MediChanAI</h2>
           <p className="text-lg mt-2 text-gray-600">Your trusted AI-powered healthcare assistant.</p>
-          <Link to="/login" className="mt-4 inline-block bg-primary text-white px-6 py-3 rounded-lg shadow-md hover:bg-accent">
+          <Link to="/LoginSelection" className="mt-4 inline-block bg-primary text-white px-6 py-3 rounded-lg shadow-md hover:bg-accent">
             Get Started
           </Link>
         </div>
@@ -76,7 +76,7 @@ const Home = () => {
       </motion.div>
 
       {/* Popular Doctors Section */}
-      <motion.div className="mt-10">
+      <motion.div className="mt-20">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold">Popular Doctors</h3>
           <Link to="/doctors" className="text-primary font-medium hover:underline">

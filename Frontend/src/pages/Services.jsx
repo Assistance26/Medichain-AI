@@ -3,6 +3,7 @@ import { AiOutlineRobot } from "react-icons/ai";
 import { MdHealthAndSafety, MdOutlineMedicalServices } from "react-icons/md";
 import { FaMoneyCheckAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
+import HomePage from "../pages/HomePage";
 
 // Define services with corresponding route paths and descriptions
 const services = [
@@ -10,7 +11,7 @@ const services = [
     name: "AI Doctor", 
     description: "Get instant medical advice from AI-powered diagnostics.", 
     icon: <AiOutlineRobot />, 
-    path: "/aidoctor" 
+    path: "/home" 
   },
   { 
     name: "Symptoms Checker", 

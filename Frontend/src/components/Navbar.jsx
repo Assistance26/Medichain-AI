@@ -25,10 +25,13 @@ const Navbar = () => {
     <motion.nav
       initial={{ y: -50 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 left-0 w-full z-50 bg-primary text-white shadow-md ${isOpen ? "pb-10" : ""}`}
+      transition={{ duration: 0.5 }}
+      className={`fixed top-0 left-0 w-full z-50 bg-primary text-white shadow-lg ${isOpen ? "pb-10" : ""}`}
     >
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
-        <h1 className="text-lg font-semibold">MediChanAI</h1>
+        <h1 className="text-lg font-semibold text-shadow-md transition-all duration-500 transform hover:scale-110 hover:text-accent hover:animate-text-glow">
+          <span className="text-gradient">MediChainAI</span>
+        </h1>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
@@ -36,20 +39,23 @@ const Navbar = () => {
             <Link
               key={item}
               to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
-              className="text-sm font-medium hover:text-accent transition-all duration-200"
+              className="text-sm font-medium transition-all duration-300 text-shadow-md hover:text-accent hover:scale-105 hover:opacity-80 hover:tracking-wide relative"
             >
               {item}
+              <motion.div
+                className="absolute bottom-0 left-0 w-full h-[2px] bg-accent scale-x-0 origin-left transition-all duration-300 group-hover:scale-x-100"
+              />
             </Link>
           ))}
           {isAuthenticated ? (
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 text-sm rounded-md shadow-sm hover:bg-red-600"
+              className="bg-red-500 text-white px-4 py-2 text-sm rounded-md shadow-md hover:bg-red-600 hover:shadow-xl hover:scale-105 transition-all duration-300"
             >
               Logout
             </button>
           ) : (
-            <Link to="/login" className="bg-white text-primary px-4 py-2 text-sm rounded-md shadow-sm hover:bg-gray-200">
+            <Link to="/LoginSelection" className="bg-white text-primary px-4 py-2 text-sm rounded-md shadow-sm hover:bg-gray-200">
               Login
             </Link>
           )}
@@ -57,7 +63,7 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <button onClick={() => setIsOpen(!isOpen)} className="md:hidden z-50">
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
+          {isOpen ? <X size={28} className="text-white" /> : <Menu size={28} className="text-white" />}
         </button>
       </div>
 
@@ -75,23 +81,26 @@ const Navbar = () => {
                 <Link
                   key={item}
                   to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
-                  className="text-sm font-medium hover:text-accent transition-all duration-200 text-black"
+                  className="text-sm font-medium hover:text-accent transition-all duration-200 text-black text-shadow-md hover:scale-105 hover:tracking-wide"
                   onClick={() => setIsOpen(false)}
                 >
                   {item}
+                  <motion.div
+                    className="absolute bottom-0 left-0 w-full h-[2px] bg-accent scale-x-0 origin-left transition-all duration-300 group-hover:scale-x-100"
+                  />
                 </Link>
               ))}
               {isAuthenticated ? (
                 <button
                   onClick={handleLogout}
-                  className="bg-red-500 text-white px-4 py-2 text-sm rounded-md shadow-sm hover:bg-red-600"
+                  className="bg-red-500 text-white px-4 py-2 text-sm rounded-md shadow-md hover:bg-red-600 hover:shadow-xl hover:scale-105 transition-all duration-300"
                 >
                   Logout
                 </button>
               ) : (
                 <Link
                   to="/login"
-                  className="bg-white text-primary px-4 py-2 text-sm rounded-md shadow-sm hover:bg-gray-200"
+                  className="bg-white text-primary px-4 py-2 text-sm rounded-md shadow-md hover:bg-gray-200 hover:shadow-xl hover:scale-105 transition-all duration-300"
                   onClick={() => setIsOpen(false)}
                 >
                   Login
