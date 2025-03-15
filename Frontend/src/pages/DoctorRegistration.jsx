@@ -1,139 +1,164 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 
 const DoctorRegistration = () => {
   const [step, setStep] = useState(1);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [number, setNumber] = useState("");
-  const [specialization, setSpecialization] = useState("");
-  const [licenseNumber, setLicenceNumber] = useState("");
-  const [experience, setExperience] = useState("");
-  const [publications, setPublications] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    number: "",
+    specialization: "",
+    licenseNumber: "",
+    experience: "",
+    publications: "",
+    password: "",
+  });
 
   const navigate = useNavigate();
 
-  const handleNext = () => {
-    setStep(2);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleBack = () => {
-    setStep(1);
-  };
+  const handleNext = () => setStep(2);
+  const handleBack = () => setStep(1);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try{
-      const res = await axios.post('http://localhost:5000/DoctorSignIn',{
-        name,email,number,specialization, licenseNumber, experience, publications, password
-      });
-      if(res.data.status=="Created Successfully"){
-       alert("Account created Succesfully");
-       console.log(res.data.doctor);
-       navigate('/login');
+    try {
+      const res = await axios.post("http://localhost:5000/DoctorSignIn", formData);
+      if (res.data.status === "Created Successfully") {
+        alert("Account created successfully!");
+        navigate("/login");
+      } else {
+        alert("Account already exists.");
       }
-      else
-      alert("Account Already Exists");
-    }
-    catch(e){
-      console.log("Error:",e);
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">
+          Doctor Registration {step === 1 ? "- Step 1" : "- Step 2"}
+        </h2>
+
         {step === 1 && (
           <div>
-            <h2 className="text-2xl font-semibold text-center mb-4">Doctor Registration - Step 1</h2>
             <input
               type="text"
               name="name"
               placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 mb-3 border rounded"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full p-3 mb-3 border rounded focus:outline-blue-500"
               required
             />
             <input
               type="email"
               name="email"
               placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 mb-3 border rounded"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-3 mb-3 border rounded focus:outline-blue-500"
               required
             />
             <input
               type="tel"
-              name="phone"
+              name="number"
               placeholder="Phone Number"
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-              className="w-full p-2 mb-3 border rounded"
+              value={formData.number}
+              onChange={handleChange}
+              className="w-full p-3 mb-3 border rounded focus:outline-blue-500"
               required
             />
             <input
               type="password"
               name="password"
               placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 mb-3 border rounded"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full p-3 mb-3 border rounded focus:outline-blue-500"
               required
             />
-            <button onClick={handleNext} className="w-full bg-blue-500 text-white py-2 rounded">Next</button>
+            <button
+              onClick={handleNext}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition"
+            >
+              Next
+            </button>
           </div>
         )}
 
         {step === 2 && (
           <div>
-            <h2 className="text-2xl font-semibold text-center mb-4">Doctor Registration - Step 2</h2>
             <input
               type="text"
               name="specialization"
               placeholder="Specialization"
-              value={specialization}
-              onChange={(e) => setSpecialization(e.target.value)}
-              className="w-full p-2 mb-3 border rounded"
+              value={formData.specialization}
+              onChange={handleChange}
+              className="w-full p-3 mb-3 border rounded focus:outline-blue-500"
               required
             />
             <input
               type="text"
               name="licenseNumber"
               placeholder="License Number"
-              value={licenseNumber}
-              onChange={(e) => setLicenceNumber(e.target.value)}
-              className="w-full p-2 mb-3 border rounded"
+              value={formData.licenseNumber}
+              onChange={handleChange}
+              className="w-full p-3 mb-3 border rounded focus:outline-blue-500"
               required
             />
             <input
               type="text"
-              name="Experience"
-              placeholder="Experience"
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              className="w-full p-2 mb-3 border rounded"
+              name="experience"
+              placeholder="Experience (Years)"
+              value={formData.experience}
+              onChange={handleChange}
+              className="w-full p-3 mb-3 border rounded focus:outline-blue-500"
               required
             />
             <input
               type="text"
-              name="Total Publications"
+              name="publications"
               placeholder="Total Publications"
-              value={publications}
-              onChange = {(e) => setPublications(e.target.value)}
-              className="w-full p-2 mb-3 border rounded"
+              value={formData.publications}
+              onChange={handleChange}
+              className="w-full p-3 mb-3 border rounded focus:outline-blue-500"
               required
             />
-            
+
             <div className="flex justify-between">
-              <button onClick={handleBack} className="bg-gray-500 text-white py-2 px-4 rounded">Back</button>
-              <button onClick={handleSubmit} className="bg-green-500 text-white py-2 px-4 rounded">Submit</button>
+              <button
+                onClick={handleBack}
+                className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded transition"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition"
+              >
+                Submit
+              </button>
             </div>
           </div>
         )}
+
+        {/* Already have an account? */}
+        <p className="text-center text-gray-600 mt-4">
+          Already have an account?{" "}
+          <span
+            onClick={() => navigate("/login")}
+            className="text-blue-600 hover:underline cursor-pointer"
+          >
+            Sign in
+          </span>
+        </p>
       </div>
     </div>
   );
