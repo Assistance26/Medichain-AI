@@ -33,7 +33,7 @@ const Footer = () => {
                   Home
                 </a>
               </li>
-              {["About Us", "Services", "Contact"].map((item, index) => (
+              {["About", "Services", "Contact"].map((item, index) => (
                 <li key={index}>
                   <a
                     href={`/${item.toLowerCase().replace(" ", "")}`}
