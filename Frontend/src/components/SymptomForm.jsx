@@ -80,6 +80,30 @@ function SearchableSymptomDropdown({ onSelect, selectedSymptoms }) {
   )
 }
 
+function SelectedSymptom({ symptom, onRemove }) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      className="flex items-center gap-2 p-2 bg-primary/40 text-primary-foreground rounded-lg"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <span>{symptom.name}</span>
+      <motion.button
+        onClick={() => onRemove(symptom.id)}
+        className="p-1 hover:bg-primary/80 rounded-full"
+        whileHover={{ rotate: 90 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        ×
+      </motion.button>
+    </motion.div>
+  )
+}
+
 export default function SymptomForm({ onPrediction }) {
   const [selectedSymptoms, setSelectedSymptoms] = useState(new Set())
   const [selectedSymptomDetails, setSelectedSymptomDetails] = useState([])
@@ -158,6 +182,30 @@ export default function SymptomForm({ onPrediction }) {
             selectedSymptoms={selectedSymptoms}
           />
         </div>
+
+        <AnimatePresence>
+          {selectedSymptomDetails.length > 0 && (
+            <motion.div
+              className="mt-4"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              <h3 className="text-sm font-medium mb-2">Selected Symptoms</h3>
+              <motion.div layout className="flex flex-wrap gap-2">
+                <AnimatePresence>
+                  {selectedSymptomDetails.map((symptom) => (
+                    <SelectedSymptom
+                      key={symptom.id}
+                      symptom={symptom}
+                      onRemove={handleRemoveSymptom}
+                    />
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {error && (
           <motion.p
