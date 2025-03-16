@@ -6,7 +6,7 @@ const MainLayout = ({ children }) => {
   const location = useLocation();
 
   // Define pages where the footer should be hidden
-  const hiddenFooterRoutes = ["/aidoctor", "/symptom-checker", "/health-score", "/cost-planning"];
+  const hiddenFooterRoutes = ["/aidoctor","/chatbot", "/symptom-checker", "/health-score", "/cost-planning"];
   const hideFooter = hiddenFooterRoutes.includes(location.pathname);
 
   // Remove padding only on the AiDoctor page

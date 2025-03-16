@@ -11,7 +11,7 @@ const services = [
     name: "AI Doctor", 
     description: "Get instant medical advice from AI-powered diagnostics.", 
     icon: <AiOutlineRobot />, 
-    path: "/home" 
+    path: "/aidoctor" 
   },
   { 
     name: "Symptoms Checker", 

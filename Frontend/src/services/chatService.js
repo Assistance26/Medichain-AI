@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5003/api/chatbot";
+const API_BASE_URL = "http://localhost:5000/api/chatbot";
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
 const TIMEOUT = 30000; // 30 seconds
