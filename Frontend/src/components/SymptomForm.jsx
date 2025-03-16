@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { symptoms } from '../data/medical_data'
 import modelService from '../services/modelServices'
+import Lottie from 'lottie-react'
+import doctorAnimation from '../assets/doctor.json'
 
 function SearchableSymptomDropdown({ onSelect, selectedSymptoms }) {
   const [query, setQuery] = useState('')
@@ -78,30 +80,6 @@ function SearchableSymptomDropdown({ onSelect, selectedSymptoms }) {
   )
 }
 
-function SelectedSymptom({ symptom, onRemove }) {
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      className="flex items-center gap-2 p-2 bg-primary/40 text-primary-foreground rounded-lg"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <span>{symptom.name}</span>
-      <motion.button
-        onClick={() => onRemove(symptom.id)}
-        className="p-1 hover:bg-primary/80 rounded-full"
-        whileHover={{ rotate: 90 }}
-        whileTap={{ scale: 0.9 }}
-      >
-        ×
-      </motion.button>
-    </motion.div>
-  )
-}
-
 export default function SymptomForm({ onPrediction }) {
   const [selectedSymptoms, setSelectedSymptoms] = useState(new Set())
   const [selectedSymptomDetails, setSelectedSymptomDetails] = useState([])
@@ -172,16 +150,6 @@ export default function SymptomForm({ onPrediction }) {
           transition={{ delay: 0.2 }}
         >
           <h2 className="text-xl font-semibold">Select Your Symptoms</h2>
-          {modelStatus === 'initializing' && (
-            <motion.span
-              className="text-sm text-muted-foreground"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              Initializing AI model...
-            </motion.span>
-          )}
         </motion.div>
 
         <div className="relative" style={{ zIndex: 1000 }}>
@@ -190,30 +158,6 @@ export default function SymptomForm({ onPrediction }) {
             selectedSymptoms={selectedSymptoms}
           />
         </div>
-
-        <AnimatePresence>
-          {selectedSymptomDetails.length > 0 && (
-            <motion.div
-              className="mt-4"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <h3 className="text-sm font-medium mb-2">Selected Symptoms</h3>
-              <motion.div layout className="flex flex-wrap gap-2">
-                <AnimatePresence>
-                  {selectedSymptomDetails.map((symptom) => (
-                    <SelectedSymptom
-                      key={symptom.id}
-                      symptom={symptom}
-                      onRemove={handleRemoveSymptom}
-                    />
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {error && (
           <motion.p
@@ -242,34 +186,16 @@ export default function SymptomForm({ onPrediction }) {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          {isLoading ? (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ repeat: Infinity, duration: 1 }}
-            >
-              Analyzing...
-            </motion.span>
-          ) : modelStatus === 'ready' ? (
-            'Check Symptoms'
-          ) : (
-            'Loading AI Model...'
-          )}
+          {isLoading ? 'Analyzing...' : modelStatus === 'ready' ? 'Check Symptoms' : 'Loading AI Model...'}
         </motion.button>
-      </div>
 
-      <AnimatePresence>
-        {modelStatus === 'error' && (
-          <motion.p
-            className="text-sm text-destructive text-center"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
-            Error loading the AI model. Please refresh the page to try again.
-          </motion.p>
+        {modelStatus === 'initializing' && (
+          <div className="flex flex-col items-center mt-4">
+            <p className="text-sm text-muted-foreground"></p>
+            <Lottie animationData={doctorAnimation} className="w-40 h-50" />
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     </div>
   )
-} 
+}
