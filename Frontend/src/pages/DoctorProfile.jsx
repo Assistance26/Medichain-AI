@@ -1,6 +1,8 @@
 import { useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState,useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {ChatbotContext} from '../context/ChatbotContext';
+import axios from 'axios';
 
 const bookedAppointments = {
   "2025-03-16": ["10:00 AM", "4:00 PM"],
@@ -27,6 +29,7 @@ const getNextSevenDays = () => {
 const timeSlots = ["10:00 AM", "11:30 AM", "2:00 PM", "4:00 PM", "6:00 PM"];
 
 const DoctorProfile = () => {
+  const {user,setUser} = useContext(ChatbotContext);
   const location = useLocation();
   const doctor = location.state || {};
 
@@ -36,12 +39,48 @@ const DoctorProfile = () => {
 
   const availableDates = getNextSevenDays();
 
-  const handleBookAppointment = () => {
-    if (selectedDate && selectedTime) {
-      setShowConfirmation(true);
-      setTimeout(() => setShowConfirmation(false), 3000);
+  const handleBookAppointment = async () => {
+    if (!doctor || !doctor.name) {
+        console.error("Doctor name is missing");
+        alert("Please select a doctor");
+        return;
     }
-  };
+
+    if (!user || !user.name) {
+        console.error("User not logged in");
+        alert("Please log in first");
+        return;
+    }
+
+    if (!selectedDate || !selectedTime) {
+        console.error("Date or time is missing");
+        alert("Please select date and time");
+        return;
+    }
+
+    console.log(doctor.name, ":", selectedDate, ",", selectedTime, "with:", user.name);
+
+    try {
+        const res = await axios.post("http://localhost:5000/appointment", {
+            Docname: doctor.name,
+            appointmentAt: selectedDate,
+            timeSlot: selectedTime,
+            PatientName: user.name
+        });
+
+        if (res.data.status === 'fixed') {
+            console.log("Done:", res.data.date);
+            alert("Appointment fixed!");
+        } else {
+            console.log("Issue:", res.data.status);
+            alert(res.data.status);
+        }
+    } catch (e) {
+        console.error("Error booking appointment:", e);
+        alert("Something went wrong! Check console.");
+    }
+};
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-6">
@@ -70,7 +109,7 @@ const DoctorProfile = () => {
           {[
             { label: "📧 Email", value: doctor.email },
             { label: "🔢 License Number", value: doctor.licenseNumber },
-            { label: "🏆 Experience", value: `${doctor.experience || "N/A"} years` },
+            { label: "🏆 Experience", value: `${doctor.Experience || "N/A"} years` },
           ].map((item, index) => (
             <div key={index} className="flex justify-between border-b border-gray-300 py-2 text-lg">
               <span className="font-semibold text-gray-700">{item.label}:</span>
@@ -96,6 +135,7 @@ const DoctorProfile = () => {
                 onClick={() => {
                   setSelectedDate(d.fullDate);
                   setSelectedTime("");
+                  
                 }}
               >
                 <span>{d.day}</span>

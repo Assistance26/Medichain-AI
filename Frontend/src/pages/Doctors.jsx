@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from 'axios';
 
 const Doctors = () => {
   const [doctorsList, setDoctorsList] = useState([]);
+  const [doctor, setDoctor] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
+  const [showDoctorCard, setShowDoctorCard] = useState(false);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -24,6 +26,25 @@ const Doctors = () => {
     };
     fetchDoctors();
   }, []);
+  
+  const handleSearch = async (name) => {
+    try {
+      const res = await axios.get("http://localhost:5000/search", {
+        params: { name }
+      });
+      if (res.data.status === 'Doctor Found') {
+        console.log("Doctor Found", res.data.doctor);
+        setDoctor(res.data.doctor);
+        setShowDoctorCard(true);
+      } else {
+        console.log("No doctor found");
+        setDoctor(null);
+        setShowDoctorCard(false);
+      }
+    } catch (e) {
+      console.log("Error:", e);
+    }
+  };
 
   return (
     <div className="container mx-auto p-6">
@@ -43,7 +64,7 @@ const Doctors = () => {
           />
           <button
             className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-all"
-            onClick={() => console.log("Searching for:", searchQuery)}
+            onClick={() => handleSearch(searchQuery)}
           >
             Search
           </button>
@@ -96,6 +117,43 @@ const Doctors = () => {
           <p className="text-center text-gray-500 col-span-3">🚫 No doctors found.</p>
         )}
       </motion.div>
+
+      {/* 🔹 Doctor Pop-up Card */}
+      <AnimatePresence>
+        {showDoctorCard && doctor && (
+          <motion.div
+            className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="bg-white p-6 rounded-xl shadow-2xl w-96 text-center"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4 overflow-hidden">
+                <img 
+                  src={`https://i.pravatar.cc/100?img=30`} 
+                  alt={doctor.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="text-2xl font-semibold text-blue-600">{doctor.name}</h3>
+              <p className="text-gray-500">{doctor.specialization}</p>
+              <p className="mt-2 text-gray-700">{doctor.bio || "No bio available"}</p>
+              <button
+                className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all"
+                onClick={() => setShowDoctorCard(false)}
+              >
+                Close
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

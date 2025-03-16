@@ -6,17 +6,27 @@ const LoginSelection = () => {
 
   return (
     <div className="flex flex-col justify-center items-center h-screen bg-gray-100 px-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Welcome! How would you like to continue?</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-lg w-full">
-        {[{
-          title: "Sign in as Doctor",
-          description: "Access your medical dashboard",
-          onClick: () => navigate("/DoctorRegistration"),
-        }, {
-          title: "Sign in as Patient",
-          description: "Manage your health records",
-          onClick: () => navigate("/login"),
-        }].map((item, index) => (
+      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+        Welcome! How would you like to continue?
+      </h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl w-full">
+        {[
+          {
+            title: "Sign in as Doctor",
+            description: "Access your medical dashboard",
+            onClick: () => navigate("/DoctorRegistration"),
+          },
+          {
+            title: "Sign in as Patient",
+            description: "Manage your health records",
+            onClick: () => navigate("/Signup"),
+          },
+          {
+            title: "Sign in as Admin",
+            description: "Manage system users and data",
+            onClick: () => navigate("/AdminSignup"),
+          },
+        ].map((item, index) => (
           <motion.div
             key={index}
             className="bg-white bg-opacity-20 backdrop-blur-lg p-8 rounded-2xl shadow-lg cursor-pointer text-gray-800 text-center border border-gray-300 hover:bg-opacity-30 transition"

@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 const net = require('net');
 const twilio = require("twilio");
 const nodemailer = require("nodemailer");
-const { Doctor, User } = require("./Connectivity/mongoDB");
+const { Doctor, User, Admin } = require("./Connectivity/mongoDB");
 
 // Initialize Express app with WebSocket support
 const app = express();
@@ -84,26 +84,111 @@ app.post("/api/token", (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
-// User Signup with Email Notification
-app.post("/signup", async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        if (await User.findOne({ email })) return res.json({ status: "User Already Exists" });
-        const user = await User.create({ email, password });
-        sendEmail(email, "Welcome to Medichain AI", "Thank you for signing up!");
-        res.json({ status: "User Created", user });
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+app.get('/login', async(req, res) => {
+    const {email, password} = req.query;
+    console.log(email,password);
+    try{
+        const check = await User.findOne({email});
+        const checkDoctor = await Doctor.findOne({email});
+        const checkAdmin = await Admin.findOne({email});
+        console.log(check);
+        if(check){
+        console.log("User Login");
+        console.log(check);
+        res.json({status:"User found", user: check});
+        }
+        else if(checkDoctor){
+            console.log("Doctor Login");
+            console.log(checkDoctor);
+        res.json({status:"Doctor found", user: checkDoctor});
+        }
+        else if(checkAdmin){
+            console.log("Admin Login");
+            console.log(checkAdmin);
+        res.json({status:"Admin found", user: checkAdmin});
+        }
+        else
+        res.json({status:"Does not exists"});
+    }
+    catch(e){
+        res.status(500).json({error:"Internal Server Error"});
     }
 });
 
+// User Signup with Email Notification
+
+app.post('/signup', async (req, res) => {
+    const { name, email, password } = req.body;
+    try {
+        const connection = await User.findOne({email});
+        if(connection)
+            res.json({status:"User Already Exists"});
+        else{
+            const user = await User.create({name: name, email: email, password: password});
+            res.json({status:"User Created", user:user});
+        }
+    } catch (error) {
+        console.error("Signup Error:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+app.post('/adminSignup', async (req, res) => {
+    const { name, email, password } = req.body;
+    try {
+        const connection = await Admin.findOne({email});
+        if(connection)
+            res.json({status:"User Already Exists"});
+        else{
+            const user = await Admin.create({name: name, email: email, password: password});
+            res.json({status:"User Created", user:user});
+        }
+    } catch (error) {
+        console.error("Signup Error:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+})
+
+app.get('/pendingDoctors', async (req, res) => {
+    try {
+        const find = await Doctor.find({ approval: "pending" });
+        if (find.length > 0) {
+            console.log(find);
+            res.json({ status: "fetched", doctors: find }); // Change `pending` to `doctors`
+        } else {
+            res.json({ status: "not_found", doctors: [] });
+        }
+    } catch (e) {
+        console.error("Error fetching pending doctors:", e);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+app.post('/updateDoctorStatus', async (req, res) => {
+    const {doctorId, status} = req.body;
+    try{
+        const check = await Doctor.findById(doctorId);
+        if(check){
+            const updatedDoctor = await Doctor.findByIdAndUpdate(
+                doctorId, 
+                { approval: status }, 
+                { new: true }
+            );
+            res.json({status:'updated', new: updatedDoctor});
+        }
+        else
+        console.log("Some issue");
+    }
+    catch(e){
+        res.status(400).json({error:"Internal Server error"});
+    }
+})
 // Doctor Signup with Email Notification
 app.post("/DoctorSignIn", async (req, res) => {
     const { email, name, number, specialization, licenseNumber, experience, publications, password } = req.body;
     try {
-        if (await Doctor.findOne({ email })) return res.json({ status: "Account Already Exists" });
-        const doctor = await Doctor.create({ name, email, number, specialization, licenseNumber, experience, publications, password });
+        if (await Doctor.findOne({ email })) 
+            return res.json({ status: "Account Already Exists" });
+        const doctor = await Doctor.create({ name, email, number, specialization, licenseNumber, Experience: experience, publications, password, approval: "pending" });
         sendEmail(email, "Doctor Registration Successful", `Dear Dr. ${name}, your account has been created successfully.`);
         res.json({ status: "Created Successfully", doctor });
     } catch (error) {
@@ -114,12 +199,102 @@ app.post("/DoctorSignIn", async (req, res) => {
 // Fetch Doctors
 app.get("/fetchDoctors", async (_req, res) => {
     try {
-        const doctors = await Doctor.find();
+        const doctors = await Doctor.find({approval: "approved"});
         res.json({ status: doctors.length ? "fetched" : "No doctors record", doctors });
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+app.get('/search', async (req, res) => {
+    const {name} = req.query;
+    try{
+    const find = await Doctor.findOne({name});
+    console.log(find);
+    if(find){
+        res.json({status:"Doctor Found", doctor: find});
+        console.log("Doctor", find);
+    }
+    else
+        res.json({status:"Doctor not found"});
+}
+catch(e){
+    res.status(400).json({error:"Internal Server Error"});
+}
+})
+
+app.post('/appointment', async (req, res) => {
+    const { Docname, PatientName, timeSlot, appointmentAt } = req.body;
+    console.log(Docname, ":", appointmentAt, ",", timeSlot, "with:", PatientName);
+
+    try {
+        const fix = await Doctor.findOne({ name: Docname });
+
+        if (!fix) {
+            console.log("Doctor not found:", Docname);
+            return res.json({ status: "Doctor not found" });
+        }
+
+        const updated = await Doctor.findOneAndUpdate(
+            { name: Docname },
+            {
+                $push: {
+                    appointmentWith: PatientName,  // ✅ Fixed push syntax
+                    appointmentAt: appointmentAt,
+                    timeSlot: timeSlot
+                }
+            },
+            { new: true }
+        );
+
+        const userUpdate = await User.findOneAndUpdate(
+            { name: PatientName },
+            {
+                $set: {
+                    appointmentAt: appointmentAt,
+                    timeSlot: timeSlot,
+                    appointmentWith: Docname
+                }
+            },
+            { new: true }
+        );
+
+        if (!userUpdate) {
+            console.log("User not found:", PatientName);
+            return res.json({ status: "User not found" });
+        }
+
+        res.json({ status: "fixed", date: updated });
+    } catch (e) {
+        console.error("Error:", e);
+        res.status(500).json({ status: "Internal Server Error" });
+    }
+});
+
+
+
+app.get('/fetchDates', async (req, res) => {
+    const {name} = req.query;
+    console.log("Route hit: /fetchDates", name); // Debugging step
+
+    try {
+        // Fetch doctors where appointmentAt, appointmentWith, and timeSlot are not empty
+        const fetch = await Doctor.findOne({name});
+
+        console.log("Fetched Data:", fetch); // Debugging step
+
+        if (fetch) {
+            res.json({ status: "fetched", dates: fetch });
+        } else {
+            res.json({ status: "No appointments found" });
+        }
+    } catch (error) {
+        console.error("Error fetching appointments:", error);
+        res.status(500).json({ status: "Internal Server Error" });
+    }
+});
+
+
 
 // MongoDB Connection & Port Handling
 const INITIAL_PORT = process.env.PORT || 5000;
