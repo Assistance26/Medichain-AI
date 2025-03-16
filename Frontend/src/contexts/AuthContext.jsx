@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, use } from "react";
 import Web3 from "web3";
 import UserAuth from "../contracts/UserAuth.json"; // ABI of your smart contract
 
@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [web3, setWeb3] = useState(null);
   const [contract, setContract] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
 
   useEffect(() => {
     // Initialize Web3 and Contract
@@ -60,6 +61,8 @@ export const AuthProvider = ({ children }) => {
     setContract,
     userRole,
     setUserRole,
+    authUser,
+    setAuthUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -6,6 +6,7 @@ import { doctors } from "../components/PopularDoctors";
 import { AiOutlineRobot } from "react-icons/ai";
 import { MdHealthAndSafety, MdOutlineMedicalServices } from "react-icons/md";
 import { FaMoneyCheckAlt } from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
@@ -27,6 +28,7 @@ const faqs = [
 const Home = () => {
   const [openIndex, setOpenIndex] = useState(null);
   const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
+  const { authUser } = useAuth();
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-blue-50 to-blue-200">
@@ -41,9 +43,13 @@ const Home = () => {
         <div className="text-center md:text-left">
           <h2 className="text-3xl font-bold text-gray-800">Welcome to MediChanAI</h2>
           <p className="text-lg mt-2 text-gray-600">Your trusted AI-powered healthcare assistant.</p>
+          {(authUser == null)?
           <Link to="/LoginSelection" className="mt-4 inline-block bg-primary text-white px-6 py-3 rounded-lg shadow-md hover:bg-accent">
             Get Started
           </Link>
+          :
+          <p className="text-lg mt-2 text-gray-600">Hurray! Now Access the Unique & trusted features.</p>
+          }
         </div>
 
         {/* Lottie Animation */}

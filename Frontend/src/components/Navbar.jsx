@@ -2,19 +2,22 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react"; // Icon for hamburger menu
+import { useAuth } from "../contexts/AuthContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isOpen, setIsOpen] = useState(false); // State for mobile menu
+  const { authUser,setAuthUser } = useAuth();
 
-  useEffect(() => {
-    setIsAuthenticated(localStorage.getItem("isAuthenticated") === "true");
-  }, []);
+  // useEffect(() => {
+  //   setIsAuthenticated(localStorage.getItem("isAuthenticated") === "true");
+  // }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    setIsAuthenticated(false);
+    // localStorage.removeItem("isAuthenticated");
+    // setIsAuthenticated(false);
+    setAuthUser(null);
     navigate("/");
     setIsOpen(false); // Close menu after logout
   };
@@ -47,7 +50,7 @@ const Navbar = () => {
               />
             </Link>
           ))}
-          {isAuthenticated ? (
+          {!(authUser == null) ? (
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white px-4 py-2 text-sm rounded-md shadow-md hover:bg-red-600 hover:shadow-xl hover:scale-105 transition-all duration-300"
@@ -56,7 +59,7 @@ const Navbar = () => {
             </button>
           ) : (
             <Link to="/LoginSelection" className="bg-white text-primary px-4 py-2 text-sm rounded-md shadow-sm hover:bg-gray-200">
-              Login
+              Signup
             </Link>
           )}
         </div>
@@ -90,7 +93,7 @@ const Navbar = () => {
                   />
                 </Link>
               ))}
-              {isAuthenticated ? (
+              {!(authUser == null) ? (
                 <button
                   onClick={handleLogout}
                   className="bg-red-500 text-white px-4 py-2 text-sm rounded-md shadow-md hover:bg-red-600 hover:shadow-xl hover:scale-105 transition-all duration-300"
@@ -103,7 +106,7 @@ const Navbar = () => {
                   className="bg-white text-primary px-4 py-2 text-sm rounded-md shadow-md hover:bg-gray-200 hover:shadow-xl hover:scale-105 transition-all duration-300"
                   onClick={() => setIsOpen(false)}
                 >
-                  Login
+                  Signup
                 </Link>
               )}
             </div>

@@ -107,7 +107,7 @@ const VideoCall = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        🎥 Twilio Video Call
+        🎥 Video Call
       </motion.h2>
 
       <motion.input

@@ -340,7 +340,7 @@ const Chatbot = () => {
             className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center"
           >
             <MessageSquare className="mr-2 text-blue-500" size={16} />
-            Sentiment Analysis: {sentiment}
+            Mood: {sentiment}
           </motion.div>
         )}
       </motion.div>

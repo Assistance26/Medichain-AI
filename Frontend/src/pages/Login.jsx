@@ -9,7 +9,7 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const { account, contract, setUserRole } = useAuth();
+  const { account, contract, setUserRole,setAuthUser } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -26,25 +26,29 @@ const Login = () => {
         .call({ from: account });
 
       if (isAuthenticated) {
-        const userRole = await contract.methods
+        const role = await contract.methods
           .getUserRole(account)
           .call({ from: account });
-        setUserRole(userRole);
-
-        if (userRole.toString().charAt(0) === "0") {
+        setUserRole(role);
+        // console.log("Role:",role);
+        setAuthUser({email,role});
+        
+        if (role.toString().charAt(0) === "0") {
           navigate("/");
-        // } else if (userRole.toString().charAt(0) === "1") {
-        //   navigate("/doctor-dashboard");
-        // } else if (userRole.toString().charAt(0) === "2") {
-        //   navigate("/admin-dashboard");
-        // }
-        } else {
+        } else if (role.toString().charAt(0) === "2") {
+          navigate("/AdminDashboard");
+        }
+        else {
+          navigate("/DoctorDashboard");
+        } 
+      }
+        else {
           alert("Invalid email or password");
         }
-      };
-  } catch (error) {
-    console.error("Login error", error);
-  }
+      }
+      catch (error) {
+        console.error("Login error", error);
+      }
 };
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
