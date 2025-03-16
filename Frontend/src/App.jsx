@@ -2,9 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import HomePage from "./pages/HomePage";
-import AdminSignup from './pages/AdminSignup';
-import AdminDashboard from './pages/AdminDashboard';
-import LoginSelection from './pages/LoginSelection';
+import AdminSignup from "./pages/AdminSignup";
+import AdminDashboard from "./pages/AdminDashboard";
+import LoginSelection from "./pages/LoginSelection";
 import About from "./pages/About";
 import Services from "./pages/Services";
 import Doctors from "./pages/Doctors";
@@ -20,8 +20,9 @@ import CostPlanning from "./pages/CostPlanning.jsx";
 import SymptomChecker from "./pages/SymptomChecker.jsx";
 import NotFound from "./pages/NotFound";
 import Chatbot from "./components/Chatbot";
-import ChatbotProvider  from "./context/ChatbotContext";
+import ChatbotProvider from "./context/ChatbotContext";
 import DoctorLogin from "./pages/DoctorLogin.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
   return (
@@ -29,25 +30,102 @@ function App() {
       <MainLayout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/aidoctor" element={<HomePage />} />
           <Route path="/LoginSelection" element={<LoginSelection />} />
           <Route path="/about" element={<About />} />
-          <Route path="/AdminSignup" element={<AdminSignup />} />
-          <Route path="/AdminDashboard" element={<AdminDashboard />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/doctors" element={<Doctors />} />
-          <Route path="/DoctorProfile" element={<DoctorProfile />} />
-          <Route path="/DoctorDashboard" element={<DoctorDashboard />} />
           <Route path="/DoctorRegistration" element={<DoctorRegistration />} />
-          <Route path="/appointment" element={<Appointment />} />
+          <Route path="/AdminSignup" element={<AdminSignup />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/health-score" element={<HealthScore />} />
-          <Route path="/cost-planning" element={<CostPlanning />} />
-          <Route path="/symptom-checker" element={<SymptomChecker />} />
-          <Route path="/chatbot" element={<Chatbot />} />
           <Route path="/DoctorLogin" element={<DoctorLogin />} />
+          <Route
+            path="/aidoctor"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/AdminDashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/services"
+            element={
+              <ProtectedRoute>
+                <Services />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/doctors"
+            element={
+              <ProtectedRoute>
+                <Doctors />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/DoctorProfile"
+            element={
+              <ProtectedRoute>
+                <DoctorProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/DoctorDashboard"
+            element={
+              <ProtectedRoute>
+                <DoctorDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/appointment"
+            element={
+              <ProtectedRoute>
+                <Appointment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/health-score"
+            element={
+              <ProtectedRoute>
+                <HealthScore />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cost-planning"
+            element={
+              <ProtectedRoute>
+                <CostPlanning />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/symptom-checker"
+            element={
+              <ProtectedRoute>
+                <SymptomChecker />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chatbot"
+            element={
+              <ProtectedRoute>
+                <Chatbot />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </MainLayout>
