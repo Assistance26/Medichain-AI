@@ -1,37 +1,62 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+// import {GlobalContext} from '../context/AppContext';
+import axios from 'axios';
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const { account, contract, setUserRole } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user"));
-    
-    if (user && user.email === formData.email && user.password === formData.password) {
-      localStorage.setItem("isAuthenticated", "true"); // Set auth status
-      navigate("/");
-    } else {
-      alert("Invalid credentials");
-    }
-  };
+    const { email, password } = formData;
 
+    try {
+      const isAuthenticated = await contract.methods
+        .login(email, password)
+        .call({ from: account });
+
+      if (isAuthenticated) {
+        const userRole = await contract.methods
+          .getUserRole(account)
+          .call({ from: account });
+        setUserRole(userRole);
+
+        if (userRole.toString().charAt(0) === "0") {
+          navigate("/");
+        // } else if (userRole.toString().charAt(0) === "1") {
+        //   navigate("/doctor-dashboard");
+        // } else if (userRole.toString().charAt(0) === "2") {
+        //   navigate("/admin-dashboard");
+        // }
+        } else {
+          alert("Invalid email or password");
+        }
+      };
+  } catch (error) {
+    console.error("Login error", error);
+  }
+};
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-96">
+      <form onSubmit={handleLogin} className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-semibold text-center mb-4">Login</h2>
-
+        
         <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
+           type="email"
+           name="email"
+           placeholder="Email"
+           value={formData.email}
+           onChange={handleChange}
           className="w-full p-2 mb-3 border rounded-md"
           required
         />

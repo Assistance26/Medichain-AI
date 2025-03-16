@@ -1,24 +1,55 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+import { useAuth } from "../contexts/AuthContext";
 
 const Signup = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const navigate = useNavigate();
-
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "Patient",
+  });
+  const { account, contract } = useAuth();
+  const roles = ["Patient", "Doctor", "Admin"];
+  const navigate = useNavigate()
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    localStorage.setItem("user", JSON.stringify(formData)); // Save user data
-    navigate("/"); // Redirect to home
-  };
+    const { name, email, password, role } = formData;
 
+    const roleMap = {
+      Patient: 0,
+      Doctor: 1,
+      Admin: 2,
+    };
+
+    try {
+      await contract.methods
+        .register(name, email, password, roleMap[role])
+        .send({ from: account });
+      alert("User registered successfully");
+      navigate("/login")
+    } catch (error) {
+      console.error("Registration error", error);
+    }
+  };
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-96">
+      <form onSubmit={handleSignup} className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-semibold text-center mb-4">Sign Up</h2>
+        <input
+           type="text"
+           name="name"
+           placeholder="Name"
+           value={formData.name}
+           onChange={handleChange}
+          className="w-full p-2 mb-3 border rounded-md"
+          required
+        />
 
         <input
           type="email"
@@ -31,16 +62,16 @@ const Signup = () => {
         />
 
         <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
+         type="password"
+         name="password"
+         placeholder="Password"
+         value={formData.password}
+         onChange={handleChange}
           className="w-full p-2 mb-3 border rounded-md"
           required
         />
 
-        <button type="submit" className="bg-primary text-white w-full p-2 rounded-md">
+        <button type="submit" className="bg-primary text-white w-full p-2 rounded-md" >
           Sign Up
         </button>
 

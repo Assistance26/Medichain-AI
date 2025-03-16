@@ -1,16 +1,13 @@
 # Logs
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 lerna-debug.log*
-node_modules
 
 # Dependency directories
+node_modules/
 bower_components/
 
 # Build artifacts
@@ -31,43 +28,13 @@ dist-ssr/
 .vscode/
 !.vscode/extensions.json
 .idea/
-=======
->>>>>>> 04ac204ab5a291c82260aa5f1c64db72355a21e0
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
 .DS_Store
-<<<<<<< HEAD
-=======
->>>>>>> fc729ae3aec63a4055113d533dfaed961affc87c
->>>>>>> 04ac204ab5a291c82260aa5f1c64db72355a21e0
+
+# OS system files
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 *.iml
-
-# OS system files
-.DS_Store
-Thumbs.db
-=======
->>>>>>> fc729ae3aec63a4055113d533dfaed961affc87c
->>>>>>> 04ac204ab5a291c82260aa5f1c64db72355a21e0
