@@ -139,4 +139,8 @@ const DoctorRegistration = () => {
   );
 };
 
+<<<<<<< HEAD
 export default DoctorRegistration;
+=======
+export default DoctorRegistration;
+>>>>>>> 0c04fbbb3e00a2fbaa36098485eeb6de2f247715

@@ -10,6 +10,7 @@ const DoctorDashboard = () => {
   // Get doctor data from location state
   const doctor = location.state?.doctor;
 
+<<<<<<< HEAD
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -43,6 +44,48 @@ const DoctorDashboard = () => {
 
     fetchAppointments();
   }, [doctor, navigate]);
+=======
+  // Redirect if doctor data is missing
+  useEffect(() => {
+    if (!doctor) {
+      navigate("/login");
+    }
+  }, [doctor, navigate]);
+
+  const [appointments, setAppointments] = useState([]);
+  const [patients, setPatients] = useState([]);
+
+  // Fetch appointments when the component mounts
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/fetchDates", {
+          params: { name: doctor.name },
+        });
+  
+        if (res.data.status === "fetched") {
+          console.log("Fetched Appointments:", res.data);
+  
+          // Structuring the fetched data properly
+          const fetchedAppointments = res.data.dates.appointmentAt.map((date, index) => ({
+            appointmentAt: date,
+            appointmentWith: res.data.dates.appointmentWith[index] || "Unknown",
+            timeSlot: res.data.dates.timeSlot[index] || "Time not specified",
+          }));
+  
+          setAppointments(fetchedAppointments);
+        } else {
+          console.log("Issue: Unexpected response status");
+        }
+      } catch (e) {
+        console.error("Error fetching appointments:", e);
+      }
+    };
+  
+    fetchAppointments();
+  }, [doctor]);
+  
+>>>>>>> 0c04fbbb3e00a2fbaa36098485eeb6de2f247715
 
   return (
     <div className="container mx-auto p-6 flex justify-center">
@@ -52,9 +95,16 @@ const DoctorDashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+<<<<<<< HEAD
         {/* Show loading message if doctor data is missing */}
         {!doctor ? (
           <h2 className="text-2xl font-bold text-red-600">Loading Doctor Data...</h2>
+=======
+        {!doctor ? (
+          <h2 className="text-2xl font-bold text-red-600">
+            Loading Doctor Data...
+          </h2>
+>>>>>>> 0c04fbbb3e00a2fbaa36098485eeb6de2f247715
         ) : (
           <>
             {/* Doctor Details */}
@@ -74,12 +124,19 @@ const DoctorDashboard = () => {
                   key={index}
                   className="flex justify-between border-b border-gray-300 py-3 text-lg"
                 >
+<<<<<<< HEAD
                   <span className="font-semibold text-gray-700">{item.label}:</span>
+=======
+                  <span className="font-semibold text-gray-700">
+                    {item.label}:
+                  </span>
+>>>>>>> 0c04fbbb3e00a2fbaa36098485eeb6de2f247715
                   <span className="text-gray-900">{item.value || "N/A"}</span>
                 </div>
               ))}
             </div>
 
+<<<<<<< HEAD
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
 
@@ -103,10 +160,46 @@ const DoctorDashboard = () => {
                   patients.map((patient, index) => (
                     <p key={index} className="text-gray-700">{patient}</p>
                   ))
+=======
+            {/* Dashboard Sections */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+              {/* Upcoming Appointments */}
+              <div className="p-4 bg-gray-100 rounded-lg shadow-sm">
+  <h3 className="text-2xl font-semibold text-blue-600 mb-3">
+    📅 Upcoming Appointments
+  </h3>
+  {appointments.length > 0 ? (
+    <ul className="list-disc pl-5 text-gray-700">
+      {appointments.map((appt, index) => (
+        <li key={index} className="mb-2 border-b pb-2">
+          <strong>Patient:</strong> {appt.appointmentWith} <br />
+          <strong>Date:</strong> {appt.appointmentAt} <br />
+          <strong>Time:</strong> {appt.timeSlot}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p className="text-gray-700">No upcoming appointments.</p>
+  )}
+</div>
+
+              {/* Patient List */}
+              <div className="p-4 bg-gray-100 rounded-lg shadow-sm">
+                <h3 className="text-2xl font-semibold text-blue-600 mb-3">
+                  👨‍⚕️ Patient List
+                </h3>
+                {patients.length > 0 ? (
+                  <ul className="list-disc pl-5 text-gray-700">
+                    {patients.map((patient, index) => (
+                      <li key={index}>{patient}</li>
+                    ))}
+                  </ul>
+>>>>>>> 0c04fbbb3e00a2fbaa36098485eeb6de2f247715
                 ) : (
                   <p className="text-gray-700">No registered patients.</p>
                 )}
               </div>
+<<<<<<< HEAD
 
               {/* Notifications */}
               <div className="p-4 bg-gray-100 rounded-lg shadow-sm">
@@ -125,6 +218,8 @@ const DoctorDashboard = () => {
                 <h3 className="text-2xl font-semibold text-blue-600 mb-3">💰 Earnings</h3>
                 <p className="text-gray-700">${earnings.toFixed(2)}</p>
               </div>
+=======
+>>>>>>> 0c04fbbb3e00a2fbaa36098485eeb6de2f247715
             </div>
           </>
         )}

@@ -141,7 +141,11 @@ const Doctors = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
+<<<<<<< HEAD
               <h3 className="text-2xl font-semibold text-blue-600" onClick={() => navigate(`/DoctorProfile`, { state: doctor })}>{doctor.name}</h3>
+=======
+              <h3 className="text-2xl font-semibold text-blue-600">{doctor.name}</h3>
+>>>>>>> 0c04fbbb3e00a2fbaa36098485eeb6de2f247715
               <p className="text-gray-500">{doctor.specialization}</p>
               <p className="mt-2 text-gray-700">{doctor.bio || "No bio available"}</p>
               <button

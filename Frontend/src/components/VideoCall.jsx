@@ -18,14 +18,25 @@ const VideoCall = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identity, room: roomName }),
       });
-
-      const data = await response.json();
-      return data.token || null;
+  
+      // Log the raw response to debug issues
+      const text = await response.text();
+      console.log("Raw Response:", text);
+  
+      // Check if response is valid JSON
+      try {
+        const data = JSON.parse(text);
+        return data.token || null;
+      } catch (jsonError) {
+        console.error("Invalid JSON response:", text);
+        return null;
+      }
     } catch (error) {
       console.error("Error fetching token:", error);
       return null;
     }
   };
+  
 
   // Join Room
   const joinRoom = async () => {

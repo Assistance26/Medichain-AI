@@ -49,7 +49,10 @@ const Signup = () => {
           className="w-full p-2 mb-3 border rounded-md"
           required
         />
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0c04fbbb3e00a2fbaa36098485eeb6de2f247715
         <input
           type="email"
           name="email"
