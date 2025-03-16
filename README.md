@@ -34,7 +34,9 @@ MediChain AI is a decentralized healthcare platform that combines blockchain tec
 - Express.js
 - MongoDB
 - Smart Contracts (Solidity)
-- Natural Language Processing
+- Hugging Face API
+- Twilio API
+- Nodemailer
 
 ## Getting Started 🚀
 
@@ -48,7 +50,7 @@ MediChain AI is a decentralized healthcare platform that combines blockchain tec
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/medichain-ai.git
+git clone https://github.com/Assistance26/Medichain-AI.git
 cd medichain-ai
 cd Frontend
 npm install
@@ -57,12 +59,17 @@ npm install
 ```
 
 # Backend/.env
-MONGODB_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
+MONGODB_URI=
+HUGGINGFACE_API_KEY=
+TWILIO_ACCOUNT_SID=
+TWILIO_API_KEY=
+TWILIO_API_SECRET=
+EMAIL_USER=
+EMAIL_PASS=
 
 # Frontend/.env
 VITE_BACKEND_URL=http://localhost:5000
-VITE_CONTRACT_ADDRESS=your_contract_address
+
 
 ```bash
 # Terminal 1 - Frontend
@@ -74,53 +81,40 @@ cd Backend
 npm run dev
 ```
 
-Project Structure 📁
-Medichain-AIWF/
-├── Frontend/                         # Frontend React application
+Project Structure 📁 
+
+```markdown
+Medichain/
+├── Frontend/
 │   ├── src/
-│   │   ├── assets/                  # Static assets like images and animations
-│   │   ├── components/              # Reusable UI components
-│   │   │   ├── AboutUs.jsx         # About section component with mission and vision
-│   │   │   ├── AiLoadingSpinner.jsx # Loading animation for AI operations
-│   │   │   ├── Chatbot.jsx         # AI-powered medical chatbot interface
-│   │   │   ├── MoodTracker.jsx     # Sentiment analysis for mood tracking
-│   │   │   ├── Navbar.jsx          # Navigation bar component
-│   │   │   └── SymptomForm.jsx     # Form for symptom input and analysis
-│   │   ├── context/                 # React context providers
-│   │   │   └── AppContext.jsx      # Global state management
-│   │   ├── data/                   # Static data and configurations
-│   │   ├── hooks/                  # Custom React hooks
-│   │   ├── layouts/                # Page layout components
-│   │   ├── pages/                  # Main application pages
-│   │   │   ├── About.jsx          # About page with company info
-│   │   │   ├── Appointment.jsx    # Doctor appointment scheduling
-│   │   │   ├── HealthScore.jsx    # Health assessment calculator
-│   │   │   ├── HomePage.jsx       # Landing page with main features
-│   │   │   ├── Login.jsx         # User authentication
-│   │   │   └── SymptomChecker.jsx # AI-powered symptom analysis
-│   │   ├── services/              # API and service integrations
-│   │   ├── App.jsx               # Main application component
-│   │   ├── App.css               # Global styles
-│   │   ├── index.css             # Base styles
-│   │   └── main.jsx              # Application entry point
-│   ├── public/                    # Public assets
-│   ├── package.json              # Frontend dependencies
-│   ├── vite.config.js           # Vite configuration
-│   ├── tailwind.config.js       # Tailwind CSS configuration
-│   └── postcss.config.js        # PostCSS configuration
-│
-├── Backend/                      # Backend Node.js application
-│   ├── Connectivity/            # Database connection setup
-│   ├── config/                  # Configuration files
-│   ├── controllers/             # Request handlers
-│   ├── middleware/              # Express middleware
-│   ├── models/                  # Database models
-│   ├── routes/                  # API route definitions
-│   ├── services/               # Business logic services
-│   ├── utils/                  # Utility functions
-│   ├── server.js              # Main server file
-│   └── package.json           # Backend dependencies
-│
-├── package-lock.json           # Root dependencies lock file
-├── .gitignore                 # Git ignore rules
-└── README.md                  # Project documentation
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── data/
+│   │   ├── hooks/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── public/
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── postcss.config.js
+├── Backend/
+│   ├── Connectivity/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── server.js
+│   └── package.json
+├── package-lock.json
+├── .gitignore
+└── README.md
