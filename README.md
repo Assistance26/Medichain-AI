@@ -34,7 +34,9 @@ MediChain AI is a decentralized healthcare platform that combines blockchain tec
 - Express.js
 - MongoDB
 - Smart Contracts (Solidity)
-- Natural Language Processing
+- Hugging Face API
+- Twilio API
+- Nodemailer
 
 ## Getting Started 🚀
 
@@ -57,12 +59,17 @@ npm install
 ```
 
 # Backend/.env
-MONGODB_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
+MONGODB_URI=
+HUGGINGFACE_API_KEY=
+TWILIO_ACCOUNT_SID=
+TWILIO_API_KEY=
+TWILIO_API_SECRET=
+EMAIL_USER=
+EMAIL_PASS=
 
 # Frontend/.env
 VITE_BACKEND_URL=http://localhost:5000
-VITE_CONTRACT_ADDRESS=your_contract_address
+
 
 ```bash
 # Terminal 1 - Frontend
@@ -74,7 +81,9 @@ cd Backend
 npm run dev
 ```
 
-Project Structure 📁
+Project Structure 📁 
+
+```markdown
 Medichain/
 ├── Frontend/
 │   ├── src/
