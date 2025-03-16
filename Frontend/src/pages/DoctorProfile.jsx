@@ -3,6 +3,7 @@ import { useState,useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {ChatbotContext} from '../context/ChatbotContext';
 import axios from 'axios';
+import { useAuth } from "../contexts/AuthContext";
 
 const bookedAppointments = {
   "2025-03-16": ["10:00 AM", "4:00 PM"],
@@ -29,7 +30,8 @@ const getNextSevenDays = () => {
 const timeSlots = ["10:00 AM", "11:30 AM", "2:00 PM", "4:00 PM", "6:00 PM"];
 
 const DoctorProfile = () => {
-  const {user,setUser} = useContext(ChatbotContext);
+  // const {user,setUser} = useContext(ChatbotContext);
+  const {authUser} = useAuth();
   const location = useLocation();
   const doctor = location.state || {};
 
@@ -46,7 +48,7 @@ const DoctorProfile = () => {
         return;
     }
 
-    if (!user || !user.name) {
+    if (!authUser || !authUser.email) {
         console.error("User not logged in");
         alert("Please log in first");
         return;
@@ -58,14 +60,14 @@ const DoctorProfile = () => {
         return;
     }
 
-    console.log(doctor.name, ":", selectedDate, ",", selectedTime, "with:", user.name);
+    console.log(doctor.name, ":", selectedDate, ",", selectedTime, "with:", authUser.email);
 
     try {
         const res = await axios.post("http://localhost:5000/appointment", {
             Docname: doctor.name,
             appointmentAt: selectedDate,
             timeSlot: selectedTime,
-            PatientName: user.name
+            PatientName: authUser.email
         });
 
         if (res.data.status === 'fixed') {
