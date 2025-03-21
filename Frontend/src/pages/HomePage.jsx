@@ -1,8 +1,13 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Sparkles, Shield, Clock } from "lucide-react";
 
 function HomePage() {
+    const location = useLocation();
+    console.log("hello we are in ai Doctor page");
+
+    const ques = location.state?.initialMessage;
+    console.log(ques);
     return (
         <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-center px-6 overflow-hidden">
             {/* Animated Background Elements */}
@@ -146,7 +151,8 @@ function HomePage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                 >
-                    <Link to="/chatbot">
+                    <Link to="/chatbot" state={{initialMessage: ques
+                    }}>
                         <button className="group relative bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white px-8 py-4 rounded-full text-xl font-semibold shadow-lg overflow-hidden transition-all duration-300">
                             <span className="relative z-10">Start Chatting with AI →</span>
                             <motion.div
