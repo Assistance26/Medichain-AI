@@ -1,27 +1,30 @@
-// // context/AuthContext.jsx
-import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../firebase/firebaseConfig";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import React, { createContext, useState, useContext } from 'react';
 
-const AuthContext = createContext();
+// Create a context for the user
+const UserContext = createContext();
 
-export const AuthProvider = ({ children }) => {
- const [user, setUser] = useState(null);
+// Create a provider component
+export const UserProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
 
-useEffect(() => {
-const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-  setUser(currentUser);
-});
-return () => unsubscribe();
-  }, []);
+  // Function to set the user
+  const handleSetUser = (newUser) => {
+    setUser(newUser);
+  };
 
-   const logout = () => signOut(auth);
+  // Function to remove the user (log out)
+  const handleRemoveUser = () => {
+    setUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, logout }}>
-     {children}
-    </AuthContext.Provider>
+    <UserContext.Provider value={{ user, handleSetUser, handleRemoveUser }}>
+      {children}
+    </UserContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+// Custom hook to use the UserContext
+export const useUser = () => {
+  return useContext(UserContext);
+};

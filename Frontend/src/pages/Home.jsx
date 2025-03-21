@@ -6,7 +6,8 @@ import { doctors } from "../components/PopularDoctors";
 import { AiOutlineRobot } from "react-icons/ai";
 import { MdHealthAndSafety, MdOutlineMedicalServices } from "react-icons/md";
 import { FaMoneyCheckAlt } from "react-icons/fa";
-import { useAuth } from "../contexts/AuthContext";
+// import { useAuth } from "../contexts/AuthContext";
+import { useUser } from "../context/AuthContext";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
@@ -28,7 +29,7 @@ const faqs = [
 const Home = () => {
   const [openIndex, setOpenIndex] = useState(null);
   const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
-  const { authUser } = useAuth();
+  const { user } = useUser();
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-blue-50 to-blue-200">
@@ -41,9 +42,9 @@ const Home = () => {
         className="container mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center"
       >
         <div className="text-center md:text-left">
-          <h2 className="text-3xl font-bold text-gray-800">Welcome to MediChanAI</h2>
+          <h2 className="text-3xl font-bold text-gray-800">Welcome to MediChainAI</h2>
           <p className="text-lg mt-2 text-gray-600">Your trusted AI-powered healthcare assistant.</p>
-          {(authUser == null)?
+          {(user == null)?
           <Link to="/LoginSelection" className="mt-4 inline-block bg-primary text-white px-6 py-3 rounded-lg shadow-md hover:bg-accent">
             Get Started
           </Link>

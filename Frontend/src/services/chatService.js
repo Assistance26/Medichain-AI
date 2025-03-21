@@ -35,7 +35,7 @@ const getResponse = async (message, persona = "Medical Assistant") => {
       console.error(`❌ Error on attempt ${attempt}:`, error.message);
 
       if (error.code === "ECONNREFUSED") {
-        console.error("⚠️ Server is not running. Please start the backend.");
+        console.error("⚠ Server is not running. Please start the backend.");
         throw new Error("Server is not running. Please start the backend.");
       }
 

@@ -107,14 +107,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CostPlanning />
-              </ProtectedRoute>
+             </ProtectedRoute>
             }
           />
           <Route
             path="/symptom-checker"
             element={
               <ProtectedRoute>
-                <SymptomChecker />
+                  <SymptomChecker />
               </ProtectedRoute>
             }
           />
