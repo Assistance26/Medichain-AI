@@ -35,7 +35,7 @@ const HealthScore = () => {
             <div className="w-32 mx-auto">
               <CircularProgressbar
                 value={score}
-                text={${score}%}
+                text={`${score}%`}
                 styles={buildStyles({
                   textColor: "white",
                   pathColor: score > 80 ? "#00FF00" : score > 50 ? "#FFD700" : "#FF4500",
@@ -79,13 +79,13 @@ const getHealthAdviceFromAI = async (score) => {
     return ["⚠ API Key is missing. Please update it."];
   }
 
-  const endpoint = https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${API_KEY};
+  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${API_KEY}`;
   const prompt = {
     contents: [
       {
         parts: [
           {
-            text: My health score is ${score} out of 100. Provide 10 concise, practical tips to improve it, covering diet, exercise, sleep, and lifestyle changes. No need to add '*' or unnecessary text.,
+            text: `My health score is ${score} out of 100. Provide 10 concise, practical tips to improve it, covering diet, exercise, sleep, and lifestyle changes. No need to add '*' or unnecessary text.`
           },
         ],
       },
@@ -116,11 +116,11 @@ const getHealthAdviceFromAI = async (score) => {
       const trimmedAdviceList = [...new Set(adviceList)].slice(0, 10);
 
       return trimmedAdviceList.length > 0
-        ? trimmedAdviceList.map((tip) => ${tip})
+        ? trimmedAdviceList.map((tip) => `${tip}`)
         : ["⚠ AI couldn't generate advice. Try again."];
     } else if (data.error) {
       console.error("❌ API Error:", data.error);
-      return [⚠ API Error: ${data.error.message || "Unknown error"}];
+      return [`⚠ API Error: ${data.error.message || "Unknown error"}`];
     } else {
       return ["⚠ AI couldn't generate advice. Try again."];
     }
