@@ -107,12 +107,12 @@ const Chatbot = () => {
         ]);
       } catch (err) {
         console.error("Chatbot Error:", err);
-        setError("⚠️ An error occurred. Please try again.");
+        setError("⚠ An error occurred. Please try again.");
         setChatHistory((prev) => [
           ...prev,
           {
             sender: "system",
-            text: "⚠️ Unable to process your request.",
+            text: "⚠ Unable to process your request.",
             emoji: "🚫",
             isError: true,
           },
@@ -153,7 +153,7 @@ const Chatbot = () => {
           : "bg-gradient-to-br from-gray-100 via-blue-50 to-purple-50 text-gray-900"
       }`}
     >
-      {/* 🌙/☀️ Dark Mode Toggle */}
+      {/* 🌙/☀ Dark Mode Toggle */}
       <motion.div className="absolute top-4 right-6">
         <motion.button
           whileHover={{ scale: 1.1, rotate: 180 }}
@@ -210,7 +210,7 @@ const Chatbot = () => {
           </motion.div>
         </motion.div>
 
-        {/* ⚠️ Disclaimer */}
+        {/* ⚠ Disclaimer */}
         {showDisclaimer && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -266,7 +266,7 @@ const Chatbot = () => {
                       ? chat.isError
                         ? "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200"
                         : "bg-gray-200 dark:bg-gray-700/50"
-                      : "bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700/50 dark:to-gray-800/50"
+                      : "bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700/50 dark:text-white dark:to-gray-800/50"
                   }`}
                 >
                   {/* ✅ Show Emoji with Message */}

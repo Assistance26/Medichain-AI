@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaVideo } from "react-icons/fa"; // For video call button icon
+import VideoCall from "../components/VideoCall"; // Import the VideoCall component
 
 const DoctorDashboard = () => {
   const location = useLocation();
@@ -19,6 +21,9 @@ const DoctorDashboard = () => {
 
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false); // State for handling video call
+  const [roomName, setRoomName] = useState("");
+  const [identity, setIdentity] = useState("");
 
   // Fetch appointments when the component mounts
   useEffect(() => {
@@ -27,7 +32,7 @@ const DoctorDashboard = () => {
         const res = await axios.get("http://localhost:5000/fetchDates", {
           params: { name: doctor.name },
         });
-  
+   
         if (res.data.status === "fetched") {
           console.log("Fetched Appointments:", res.data);
   
@@ -49,7 +54,16 @@ const DoctorDashboard = () => {
   
     fetchAppointments();
   }, [doctor]);
-  
+
+  const startVideoCall = (appointmentId, patientName) => {
+    setIdentity(doctor.name); // Doctor's identity
+    setRoomName(`room_${appointmentId}`); // Create a unique room name based on appointment ID
+    setIsVideoCallActive(true); // Activate the video call UI
+  };
+
+  const closeVideoCall = () => {
+    setIsVideoCallActive(false); // Close the video call
+  };
 
   return (
     <div className="container mx-auto p-6 flex justify-center">
@@ -94,23 +108,29 @@ const DoctorDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
               {/* Upcoming Appointments */}
               <div className="p-4 bg-gray-100 rounded-lg shadow-sm">
-  <h3 className="text-2xl font-semibold text-blue-600 mb-3">
-    📅 Upcoming Appointments
-  </h3>
-  {appointments.length > 0 ? (
-    <ul className="list-disc pl-5 text-gray-700">
-      {appointments.map((appt, index) => (
-        <li key={index} className="mb-2 border-b pb-2">
-          <strong>Patient:</strong> {appt.appointmentWith} <br />
-          <strong>Date:</strong> {appt.appointmentAt} <br />
-          <strong>Time:</strong> {appt.timeSlot}
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p className="text-gray-700">No upcoming appointments.</p>
-  )}
-</div>
+                <h3 className="text-2xl font-semibold text-blue-600 mb-3">
+                  📅 Upcoming Appointments
+                </h3>
+                {appointments.length > 0 ? (
+                  <ul className="list-disc pl-5 text-gray-700">
+                    {appointments.map((appt, index) => (
+                      <li key={index} className="mb-2 border-b pb-2">
+                        <strong>Patient:</strong> {appt.appointmentWith} <br />
+                        <strong>Date:</strong> {appt.appointmentAt} <br />
+                        <strong>Time:</strong> {appt.timeSlot} <br />
+                        <button
+                          onClick={() => startVideoCall(appt.appointmentId, appt.appointmentWith)}
+                          className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 mt-2 rounded-lg hover:bg-blue-600 transition"
+                        >
+                          <FaVideo /> Join Call
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-700">No upcoming appointments.</p>
+                )}
+              </div>
 
               {/* Patient List */}
               <div className="p-4 bg-gray-100 rounded-lg shadow-sm">
@@ -131,6 +151,15 @@ const DoctorDashboard = () => {
           </>
         )}
       </motion.div>
+
+      {/* Video Call Component */}
+      {isVideoCallActive && (
+        <VideoCall
+          roomName={roomName}
+          identity={identity}
+          onClose={closeVideoCall}
+        />
+      )}
     </div>
   );
 };

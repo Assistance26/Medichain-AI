@@ -76,7 +76,7 @@ const HealthScore = () => {
 const getHealthAdviceFromAI = async (score) => {
   if (!API_KEY) {
     console.error("❌ API Key is missing!");
-    return ["⚠️ API Key is missing. Please update it."];
+    return ["⚠ API Key is missing. Please update it."];
   }
 
   const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${API_KEY}`;
@@ -85,7 +85,7 @@ const getHealthAdviceFromAI = async (score) => {
       {
         parts: [
           {
-            text: `My health score is ${score} out of 100. Provide 10 concise, practical tips to improve it, covering diet, exercise, sleep, and lifestyle changes. No need to add '*' or unnecessary text.`,
+            text: `My health score is ${score} out of 100. Provide 10 concise, practical tips to improve it, covering diet, exercise, sleep, and lifestyle changes. No need to add '*' or unnecessary text.`
           },
         ],
       },
@@ -117,16 +117,16 @@ const getHealthAdviceFromAI = async (score) => {
 
       return trimmedAdviceList.length > 0
         ? trimmedAdviceList.map((tip) => `${tip}`)
-        : ["⚠️ AI couldn't generate advice. Try again."];
+        : ["⚠ AI couldn't generate advice. Try again."];
     } else if (data.error) {
       console.error("❌ API Error:", data.error);
-      return [`⚠️ API Error: ${data.error.message || "Unknown error"}`];
+      return [`⚠ API Error: ${data.error.message || "Unknown error"}`];
     } else {
-      return ["⚠️ AI couldn't generate advice. Try again."];
+      return ["⚠ AI couldn't generate advice. Try again."];
     }
   } catch (error) {
     console.error("❌ Network Error:", error);
-    return ["⚠️ Unable to fetch AI advice. Please try again later."];
+    return ["⚠ Unable to fetch AI advice. Please try again later."];
   }
 };
 

@@ -2,14 +2,16 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 // import {GlobalContext} from '../context/AppContext';
 import axios from 'axios';
-import { useAuth } from "../contexts/AuthContext.jsx";
+// import { useAuth } from "../contexts/AuthContext.jsx";
+import { useUser } from "../context/AuthContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const { account, contract, setUserRole,setAuthUser } = useAuth();
+  // const { account, contract, setUserRole,setAuthUser } = useAuth();
+  const {  handleSetUser } = useUser();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,36 +22,60 @@ const Login = () => {
     e.preventDefault();
     const { email, password } = formData;
 
-    try {
-      const isAuthenticated = await contract.methods
-        .login(email, password)
-        .call({ from: account });
+    //BLOCK CHAIN AUTH
 
-      if (isAuthenticated) {
-        const role = await contract.methods
-          .getUserRole(account)
-          .call({ from: account });
-        setUserRole(role);
-        // console.log("Role:",role);
-        setAuthUser({email,role});
+    // try {
+    //   const isAuthenticated = await contract.methods
+    //     .login(email, password)
+    //     .call({ from: account });
+
+    //   if (isAuthenticated) {
+    //     const role = await contract.methods
+    //       .getUserRole(account)
+    //       .call({ from: account });
+    //     setUserRole(role);
+    //     // console.log("Role:",role);
+    //     setAuthUser({email,role});
         
-        if (role.toString().charAt(0) === "0") {
-          navigate("/");
-        } else if (role.toString().charAt(0) === "2") {
-          navigate("/AdminDashboard");
-        }
-        else {
-          navigate("/DoctorDashboard");
-        } 
+    //     if (role.toString().charAt(0) === "0") {
+    //       navigate("/");
+    //     } else if (role.toString().charAt(0) === "2") {
+    //       navigate("/AdminDashboard");
+    //     }
+    //     else {
+    //       navigate("/DoctorDashboard");
+    //     } 
+    //   }
+    //     else {
+    //       alert("Invalid email or password");
+    //     }
+    //   }
+    //   catch (error) {
+    //     console.error("Login error", error);
+    //   }
+
+    // normal auth
+    try {
+      const res = await axios.get("http://localhost:5000/login", {
+        params:{email,password}
+      });
+
+      if (res.data.status === "User found") {
+        console.log("User:", res.data.user);
+        handleSetUser(res.data.user);
+        navigate('/');
+      } else if (res.data.status === "Doctor found") {
+        console.log("Doctor:", res.data.user);
+        navigate('/DoctorDashboard', { state: { doctor: res.data.user } });
+      } else {
+        console.log("User doesn't exist");
+        alert("Email or password incorrect");
       }
-        else {
-          alert("Invalid email or password");
-        }
-      }
-      catch (error) {
-        console.error("Login error", error);
-      }
-};
+    } catch (e) {
+      console.log("Error:", e);
+    }
+  };
+
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <form onSubmit={handleLogin} className="bg-white p-6 rounded-lg shadow-lg w-96">

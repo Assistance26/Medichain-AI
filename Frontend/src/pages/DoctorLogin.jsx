@@ -2,7 +2,8 @@ import { useState,useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import {ChatbotContext} from '../context/ChatbotContext';
-import { useAuth } from "../contexts/AuthContext";
+// import { useAuth } from "../contexts/AuthContext";
+import { useUser } from "../context/AuthContext";
 
 const DoctorLogin = () => {
   const {user,setUser} = useContext(ChatbotContext);
@@ -10,7 +11,7 @@ const DoctorLogin = () => {
   const [password, setPassword] = useState("");
   const [doctor, setDoctor] = useState();
   const navigate = useNavigate();
-    const { setAuthUser } = useAuth();
+    const { handleSetUser } = useUser();
   
 //   const handleChange = (e) => {
 //     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -27,7 +28,7 @@ const DoctorLogin = () => {
       if(res.data.status === "Doctor found"){
         console.log(res.data.user);
         setDoctor(res.data.user);
-        setAuthUser({email,role:"Doctor"})
+        handleSetUser({email,role:"Doctor"})
         navigate('/DoctorDashboard',{state: { doctor: res.data.user } });
       }
       

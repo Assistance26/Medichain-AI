@@ -77,13 +77,16 @@ app.post("/api/token", (req, res) => {
     const { identity, room } = req.body;
     if (!identity || !room) return res.status(400).json({ error: "Identity and Room Name are required!" });
     try {
-        const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity });
+        // const uniqueIdentity = `${identity}-${roomName}`;
+        const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity});
         token.addGrant(new VideoGrant({ room }));
         res.json({ token: token.toJwt() });
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+
 app.get('/login', async(req, res) => {
     const {email, password} = req.query;
     console.log(email,password);
@@ -132,6 +135,20 @@ app.post('/signup', async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+app.post("/DoctorSignIn", async (req, res) => {
+    const { email, name, number, specialization, licenseNumber, experience, publications, password } = req.body;
+    try {
+        if (await Doctor.findOne({ email })) 
+            return res.json({ status: "Account Already Exists" });
+        const doctor = await Doctor.create({ name, email, number, specialization, licenseNumber, Experience: experience, publications, password, approval: "pending" });
+        sendEmail(email, "Doctor Registration Successful", `Dear Dr. ${name}, your account has been created successfully.`);
+        res.json({ status: "Created Successfully", doctor });
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 app.post('/adminSignup', async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -183,18 +200,6 @@ app.post('/updateDoctorStatus', async (req, res) => {
     }
 })
 // Doctor Signup with Email Notification
-app.post("/DoctorSignIn", async (req, res) => {
-    const { email, name, number, specialization, licenseNumber, experience, publications, password } = req.body;
-    try {
-        if (await Doctor.findOne({ email })) 
-            return res.json({ status: "Account Already Exists" });
-        const doctor = await Doctor.create({ name, email, number, specialization, licenseNumber, Experience: experience, publications, password, approval: "pending" });
-        sendEmail(email, "Doctor Registration Successful", `Dear Dr. ${name}, your account has been created successfully.`);
-        res.json({ status: "Created Successfully", doctor });
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
 
 // Fetch Doctors
 app.get("/fetchDoctors", async (_req, res) => {
@@ -285,6 +290,27 @@ app.get('/fetchDates', async (req, res) => {
 
         if (fetch) {
             res.json({ status: "fetched", dates: fetch });
+        } else {
+            res.json({ status: "No appointments found" });
+        }
+    } catch (error) {
+        console.error("Error fetching appointments:", error);
+        res.status(500).json({ status: "Internal Server Error" });
+    }
+});
+
+
+app.get('/UserWithAppointment', async (req, res) => {
+    const {email} = req.query;
+    console.log("Route hit: /UserWithAppointment", email); // Debugging step
+
+    try {
+        // Fetch doctors where appointmentAt, appointmentWith, and timeSlot are not empty
+        const userWithAppointment = await User.findOne({email});
+        console.log("Fetched Data:", userWithAppointment); // Debugging step
+
+        if (fetch) {
+            res.json({ status: "fetched", appointment: userWithAppointment });
         } else {
             res.json({ status: "No appointments found" });
         }

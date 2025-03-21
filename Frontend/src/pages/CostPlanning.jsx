@@ -1,138 +1,305 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import dataset from "../data/treatment_cost_dataset.json";
+import { trainModel } from "../services/trainModel";
 
 const CostPlanning = () => {
   const [disease, setDisease] = useState("");
-  const [hospitalSize, setHospitalSize] = useState("Small");
   const [hospitalName, setHospitalName] = useState("");
+  const [location, setLocation] = useState("");
+  const [urgencyLevel, setUrgencyLevel] = useState("Normal");
+  const [additionalServices, setAdditionalServices] = useState([]);
   const [estimatedCost, setEstimatedCost] = useState(null);
+  const [baseCost, setBaseCost] = useState(null);
+  const [additionalCost, setAdditionalCost] = useState({});
+  const [totalCost, setTotalCost] = useState(null);
   const [diseaseOptions, setDiseaseOptions] = useState([]);
+  const [locationOptions, setLocationOptions] = useState([]);
   const [hospitalOptions, setHospitalOptions] = useState([]);
+  const [model, setModel] = useState(null);
 
+  // Updated Service Costs (Randomized)
+  const serviceCosts = {
+    "ICU Care": () => ({
+      cost: Math.floor(Math.random() * (30000 - 15000 + 1)) + 15000,
+      type: "per day",
+    }),
+    "Private Room": () => ({
+      cost: Math.floor(Math.random() * (5000 - 2000 + 1)) + 2000,
+      type: "per day",
+    }),
+    "Post-Treatment Therapy": () => ({
+      cost: Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000,
+      type: "per session",
+    }),
+  };
+
+  // Load Machine Learning Model
   useEffect(() => {
-    const uniqueDiseases = [...new Set(dataset.map((item) => item.Disease))];
-    const uniqueHospitals = [...new Set(dataset.map((item) => item["Hospital Name"]))];
-    setDiseaseOptions(uniqueDiseases);
-    setHospitalOptions(uniqueHospitals);
+    const loadModel = async () => {
+      const trainedModel = await trainModel(dataset);
+      setModel(trainedModel);
+      console.log("Model loaded.");
+    };
+    loadModel();
   }, []);
 
-  const calculateCost = () => {
-    let filteredData = dataset.filter((item) => item.Disease === disease);
+  // Populate Disease Dropdown
+  useEffect(() => {
+    setDiseaseOptions([...new Set(dataset.map((item) => item.Disease))]);
+  }, []);
 
-    if (hospitalName) {
-      filteredData = filteredData.filter((item) => item["Hospital Name"] === hospitalName);
+  // Populate Location Dropdown based on Disease
+  useEffect(() => {
+    if (disease) {
+      setLocationOptions([
+        ...new Set(
+          dataset
+            .filter((item) => item.Disease === disease)
+            .map((item) => item.Location)
+        ),
+      ]);
     } else {
-      filteredData = filteredData.filter((item) => item["Hospital Size"] === hospitalSize);
+      setLocationOptions([]);
+    }
+  }, [disease]);
+
+  // Populate Hospital Dropdown based on Disease & Location
+  useEffect(() => {
+    if (location && disease) {
+      setHospitalOptions([
+        ...new Set(
+          dataset
+            .filter(
+              (item) => item.Disease === disease && item.Location === location
+            )
+            .map((item) => item["Hospital Name"])
+        ),
+      ]);
+    } else {
+      setHospitalOptions([]);
+    }
+  }, [location, disease]);
+
+  // Handle Additional Services Selection
+  const handleServiceChange = (service) => {
+    setAdditionalServices((prev) =>
+      prev.includes(service)
+        ? prev.filter((s) => s !== service)
+        : [...prev, service]
+    );
+  };
+
+  // Estimate Cost Function
+  const handlePrediction = async () => {
+    if (!model) {
+      console.error("Model is not loaded yet!");
+      return;
     }
 
-    if (filteredData.length > 0) {
-      setEstimatedCost(filteredData[0]["Treatment Cost"]);
-    } else {
-      setEstimatedCost("No data available");
+    const selectedHospitalData = dataset.find(
+      (item) =>
+        item.Disease === disease &&
+        item.Location === location &&
+        item["Hospital Name"] === hospitalName
+    );
+
+    if (!selectedHospitalData) {
+      console.error("No matching hospital data found!");
+      setEstimatedCost("Error: No data found");
+      return;
     }
+
+    let baseCostValue = selectedHospitalData["Treatment Cost"];
+
+    if (typeof baseCostValue !== "number" || isNaN(baseCostValue)) {
+      console.error("Invalid base cost in dataset");
+      setEstimatedCost("Error: Invalid data");
+      return;
+    }
+
+    setBaseCost(baseCostValue);
+
+    let urgencyMultiplier =
+      urgencyLevel === "Emergency" ? 1.5 : urgencyLevel === "Urgent" ? 1.2 : 1;
+    let finalCost = baseCostValue * urgencyMultiplier;
+
+    let additionalCostObj = {};
+
+    additionalServices.forEach((service) => {
+      const serviceData = serviceCosts[service]();
+      finalCost += serviceData.cost;
+      additionalCostObj[service] = serviceData;
+    });
+
+    setAdditionalCost(additionalCostObj);
+    setTotalCost(finalCost.toFixed(2));
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 animate-gradient">
-      <motion.div 
-        className="max-w-2xl mx-auto p-6 bg-white/20 backdrop-blur-lg shadow-lg rounded-lg border border-white/30"
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+      <div className="h-24 w-full"></div>
+
+      <motion.div
+        className="max-w-3xl w-full p-8 bg-white/20 backdrop-blur-lg shadow-xl rounded-xl border border-white/30"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        <motion.h2 
-          className="text-2xl font-bold text-white mb-4"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
+        <motion.h2
+          className="text-4xl font-extrabold text-center mb-6 text-gray-900"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
         >
-          Treatment Cost Estimator
+          <span className="text-blue-600">Treatment</span>
+          <span className="text-purple-600"> Cost</span>
+          <span className="text-pink-600"> Estimator</span>
         </motion.h2>
 
-        {/* Disease Dropdown */}
-        <motion.div className="mb-4">
-          <label className="block font-medium text-white">Select Disease</label>
+        {/* Disease Selection */}
+        <div className="mb-4">
+          <label className="block font-semibold text-white">
+            Select Disease
+          </label>
           <select
             value={disease}
             onChange={(e) => setDisease(e.target.value)}
-            className="w-full p-2 border rounded mt-1 bg-white/40 backdrop-blur text-black"
+            className="w-full p-3 border rounded mt-1 bg-white/40 backdrop-blur text-black"
           >
             <option value="">-- Select Disease --</option>
             {diseaseOptions.map((d, index) => (
-              <option key={index} value={d}>{d}</option>
+              <option key={index} value={d}>
+                {d}
+              </option>
             ))}
           </select>
-        </motion.div>
+        </div>
 
-        {/* Hospital Size Selection */}
-        <motion.div className="mb-4">
-          <label className="block font-medium text-white">Hospital Size</label>
-          <select
-            value={hospitalSize}
-            onChange={(e) => setHospitalSize(e.target.value)}
-            className="w-full p-2 border rounded mt-1 bg-white/40 backdrop-blur text-black"
+        {/* Location Selection */}
+        {disease && (
+          <motion.div
+            className="mb-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
           >
-            <option value="Small">Small Hospital</option>
-            <option value="Large">Large Hospital</option>
+            <label className="block font-semibold text-white">
+              Select Location
+            </label>
+            <select
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="w-full p-3 border rounded mt-1 bg-white/40 backdrop-blur text-black"
+            >
+              <option value="">-- Select Location --</option>
+              {locationOptions.map((loc, index) => (
+                <option key={index} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+          </motion.div>
+        )}
+
+        {/* Hospital Selection */}
+        {location && (
+          <motion.div
+            className="mb-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <label className="block font-semibold text-white">
+              Select Hospital
+            </label>
+            <select
+              value={hospitalName}
+              onChange={(e) => setHospitalName(e.target.value)}
+              className="w-full p-3 border rounded mt-1 bg-white/40 backdrop-blur text-black"
+            >
+              <option value="">-- Select Hospital --</option>
+              {hospitalOptions.map((hospital, index) => (
+                <option key={index} value={hospital}>
+                  {hospital}
+                </option>
+              ))}
+            </select>
+          </motion.div>
+        )}
+
+        <div className="mb-4">
+          <label className="block font-semibold text-white">
+            Urgency Level
+          </label>
+          <select
+            value={urgencyLevel}
+            onChange={(e) => setUrgencyLevel(e.target.value)}
+            className="w-full p-3 border rounded mt-1 bg-white/40 backdrop-blur text-black"
+          >
+            <option value="Normal">Normal</option>
+            <option value="Urgent">Urgent</option>
+            <option value="Emergency">Emergency</option>
           </select>
-        </motion.div>
+        </div>
 
-        {/* Hospital Name Input */}
-        <motion.div className="mb-4">
-          <label className="block font-medium text-white">Hospital Name (Optional)</label>
-          <input
-            type="text"
-            list="hospital-list"
-            value={hospitalName}
-            onChange={(e) => setHospitalName(e.target.value)}
-            className="w-full p-2 border rounded mt-1 bg-white/40 backdrop-blur text-black"
-            placeholder="Enter hospital name"
-          />
-          <datalist id="hospital-list">
-            {hospitalOptions.map((h, index) => (
-              <option key={index} value={h} />
-            ))}
-          </datalist>
-        </motion.div>
+        <div className="mb-4">
+          <label className="block font-semibold text-white">
+            Additional Features
+          </label>
+          {Object.keys(serviceCosts).map((service) => (
+            <div
+              key={service}
+              className="flex items-center space-x-2 text-white"
+            >
+              <input
+                type="checkbox"
+                checked={additionalServices.includes(service)}
+                onChange={() => handleServiceChange(service)}
+              />
+              <span>{service}</span>
+            </div>
+          ))}
+        </div>
 
-        {/* Calculate Button */}
+        {/* Estimate Cost Button */}
         <motion.button
-          onClick={calculateCost}
-          className="w-full bg-blue-500 text-white p-2 rounded mt-3 hover:bg-blue-600"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          onClick={handlePrediction}
+          className="w-full p-3 rounded-xl mt-3 text-white bg-gradient-to-r from-blue-400 to-purple-500 hover:scale-105"
         >
           Estimate Cost
         </motion.button>
 
-        {/* Display Estimated Cost */}
-        {estimatedCost !== null && (
-          <motion.div
-            className="mt-4 p-4 bg-white/30 backdrop-blur-lg border border-white/40 rounded"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h3 className="text-lg font-semibold text-white">Estimated Cost:</h3>
-            <p className="text-xl font-bold text-white">₹{estimatedCost}</p>
-          </motion.div>
-        )}
-      </motion.div>
+        {/* Cost Breakdown Section */}
+{baseCost !== null && (
+  <motion.div className="mt-6 p-4 bg-white/40 border border-white/50 rounded-xl text-center">
+    <h3 className="text-xl font-semibold text-white">Cost Breakdown:</h3>
+    
+    {/* Base Treatment Cost */}
+    <p className="text-lg font-semibold text-white mt-2">Treatment Cost: ₹{baseCost}</p>
 
-      <style>
-        {`
-          @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-          .animate-gradient {
-            background-size: 200% 200%;
-            animation: gradientAnimation 10s ease infinite;
-          }
-        `}
-      </style>
+    {/* Additional Services Breakdown */}
+    {Object.keys(additionalCost).length > 0 && (
+      <div className="mt-3">
+        <h4 className="text-lg font-semibold text-white">Additional Services</h4>
+        <ul className="text-white mt-2">
+          {Object.entries(additionalCost).map(([service, { cost, type }], index) => (
+            <li key={index} className="text-white">
+              {service}: ₹{cost} ({type})
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <hr className="my-3 border-white/50" />
+    
+    {/* Total Cost */}
+    <p className="text-2xl font-bold text-white">Total Cost: ₹{totalCost}</p>
+  </motion.div>
+)}
+
+      </motion.div>
     </div>
   );
 };
