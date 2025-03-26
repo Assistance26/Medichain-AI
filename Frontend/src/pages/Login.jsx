@@ -61,13 +61,20 @@ const Login = () => {
       });
 
       if (res.data.status === "User found") {
-        console.log("User:", res.data.user);
+        await localStorage.setItem("token", res.data.token);
+        console.log("User:", res.data.user, "token", res.data.token);
         handleSetUser(res.data.user);
         navigate('/');
       } else if (res.data.status === "Doctor found") {
+        await localStorage.setItem("token", res.data.token);
         console.log("Doctor:", res.data.user);
         navigate('/DoctorDashboard', { state: { doctor: res.data.user } });
-      } else {
+      } 
+      else if (res.data.status === "Admin found") {
+        await localStorage.setItem("token", res.data.token);
+        console.log("Admin:", res.data.user);
+        navigate('/AdminDashboard', { state: { admin: res.data.user } }); 
+    }else {
         console.log("User doesn't exist");
         alert("Email or password incorrect");
       }
@@ -107,7 +114,7 @@ const Login = () => {
 
         <p className="text-center mt-3 text-sm">
           Don't have an account?{" "}
-          <a href="/signup" className="text-primary underline">
+          <a href="/LoginSelection" className="text-primary underline">
             Sign Up
           </a>
         </p>
