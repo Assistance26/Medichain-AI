@@ -1,11 +1,11 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const { authUser } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
 
-  if (!authUser) {
+  if (!user) {
     // Redirect to login with return path
     return <Navigate to="/LoginSelection" state={{ from: location.pathname }} />;
   }

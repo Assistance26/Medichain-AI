@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-import { useAuth } from "../contexts/AuthContext";
+// import { useAuth } from "../contexts/AuthContext";
 
 const AdminSignup = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +10,7 @@ const AdminSignup = () => {
     password: "",
     role: "Admin",
   });
-  const { account, contract } = useAuth();
+  // const { account, contract } = useAuth();
   const roles = ["Patient", "Doctor", "Admin"];
   const navigate = useNavigate()
   const handleChange = (e) => {
@@ -27,16 +27,40 @@ const AdminSignup = () => {
       Admin: 2,
     };
 
-    try {
-      await contract.methods
-        .register(name, email, password, roleMap[role])
-        .send({ from: account });
-      alert("User registered successfully");
-      navigate("/login")
-    } catch (error) {
-      console.error("Registration error", error);
+
+    //block chain based auth
+
+  //   try {
+  //     await contract.methods
+  //       .register(name, email, password, roleMap[role])
+  //       .send({ from: account });
+  //     alert("User registered successfully");
+  //     navigate("/login")
+  //   } catch (error) {
+  //     console.error("Registration error", error);
+  //   }
+  // };
+
+  //normal auth
+
+  try{
+    const res = await axios.post("http://localhost:5000/adminSignup", {
+      name,
+      email,
+      password,
+    });
+    if (res.data.status === "User Already Exists") {
+      alert("Admin Already Exists");
+    } 
+    else {
+      alert("Admin Account Created");
+      console.log(res.data.admin);
+      navigate("/login");
     }
-  };
+  } catch (e) {
+    console.error("Signup Error:", e);
+    alert("An error occurred. Please try again.");
+}
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -86,6 +110,6 @@ const AdminSignup = () => {
       </form>
     </div>
   );
-};
+}};
 
 export default AdminSignup;

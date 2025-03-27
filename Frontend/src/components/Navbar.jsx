@@ -2,13 +2,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react"; // Icon for hamburger menu
-import { useAuth } from "../contexts/AuthContext";
+// import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
   // const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isOpen, setIsOpen] = useState(false); // State for mobile menu
-  const { authUser,setAuthUser } = useAuth();
+  // const { authUser,setAuthUser } = useAuth();
+  const { user, handleRemoveUser} = useAuth();
+
 
   // useEffect(() => {
   //   setIsAuthenticated(localStorage.getItem("isAuthenticated") === "true");
@@ -17,7 +20,7 @@ const Navbar = () => {
   const handleLogout = () => {
     // localStorage.removeItem("isAuthenticated");
     // setIsAuthenticated(false);
-    setAuthUser(null);
+    handleRemoveUser();
     navigate("/");
     setIsOpen(false); // Close menu after logout
   };
@@ -50,7 +53,7 @@ const Navbar = () => {
               />
             </Link>
           ))}
-          {!(authUser == null) ? (
+          {!(user == null) ? (
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white px-4 py-2 text-sm rounded-md shadow-md hover:bg-red-600 hover:shadow-xl hover:scale-105 transition-all duration-300"
@@ -93,7 +96,7 @@ const Navbar = () => {
                   />
                 </Link>
               ))}
-              {!(authUser == null) ? (
+              {!(user == null) ? (
                 <button
                   onClick={handleLogout}
                   className="bg-red-500 text-white px-4 py-2 text-sm rounded-md shadow-md hover:bg-red-600 hover:shadow-xl hover:scale-105 transition-all duration-300"

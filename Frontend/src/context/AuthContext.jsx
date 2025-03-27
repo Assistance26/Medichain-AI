@@ -1,27 +1,75 @@
-// // context/AuthContext.jsx
-import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../firebase/firebaseConfig";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+// import React, { createContext, useState, useContext } from 'react';
 
+// // Create a context for the user
+// const UserContext = createContext();
+
+// // Create a provider component
+// export const UserProvider = ({ children }) => {
+//   const [user, setUser] = useState(null);
+
+//   // Function to set the user
+//   const handleSetUser = (newUser) => {
+//     setUser(newUser);
+//   };
+
+//   // Function to remove the user (log out)
+//   const handleRemoveUser = () => {
+//     setUser(null);
+//   };
+
+//   return (
+//     <UserContext.Provider value={{ user, handleSetUser, handleRemoveUser }}>
+//       {children}
+//     </UserContext.Provider>
+//   );
+// };
+
+// // Custom hook to use the UserContext
+// export const useUser = () => {
+//   return useContext(UserContext);
+// };
+
+
+
+
+
+
+import React, { createContext, useState, useContext, useEffect } from "react";
+
+// Create Auth Context
 const AuthContext = createContext();
 
+// Auth Provider
 export const AuthProvider = ({ children }) => {
- const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    return JSON.parse(localStorage.getItem("user")) || null;
+  });
 
-useEffect(() => {
-const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-  setUser(currentUser);
-});
-return () => unsubscribe();
-  }, []);
+  // Sync user state with localStorage changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]); // 🔹 Runs whenever `user` changes
 
-   const logout = () => signOut(auth);
+  // Function to set user (login)
+  const handleSetUser = (newUser) => {
+    setUser(newUser);
+  };
+
+  // Function to remove user (logout)
+  const handleRemoveUser = () => {
+    setUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, logout }}>
-     {children}
+    <AuthContext.Provider value={{ user, handleSetUser, handleRemoveUser }}>
+      {children}
     </AuthContext.Provider>
   );
 };
 
+// Custom Hook to use Auth Context
 export const useAuth = () => useContext(AuthContext);
