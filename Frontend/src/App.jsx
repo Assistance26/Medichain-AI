@@ -39,6 +39,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/DoctorLogin" element={<DoctorLogin />} />
+          <Route path="/AdminDashboard" element={<AdminDashboard />} />
           <Route
             path="/aidoctor"
             element={
@@ -47,14 +48,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/AdminDashboard"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
+         
           <Route
             path="/services"
             element={
