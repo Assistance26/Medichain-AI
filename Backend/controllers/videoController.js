@@ -251,4 +251,3 @@ exports.getToken = async (req, res) => {
     });
   }
 };
-

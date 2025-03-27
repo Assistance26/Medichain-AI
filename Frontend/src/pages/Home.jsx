@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
@@ -8,7 +8,6 @@ import { MdHealthAndSafety, MdOutlineMedicalServices } from "react-icons/md";
 import { FaMoneyCheckAlt } from "react-icons/fa";
 // import { useAuth } from "../contexts/AuthContext";
 import { useUser } from "../context/AuthContext";
-import axios from "axios";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
@@ -31,24 +30,7 @@ const Home = () => {
   const [openIndex, setOpenIndex] = useState(null);
   const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
   const { user } = useUser();
-  useEffect(() => {
-   const authenticate = async () => {
-     const token = await localStorage.getItem('token');
-     try{
-      const res = await axios.get("http://localhost:5000/authenticate",{
-        headers:{
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if(res.data.status === "User Authenticated")
-        console.log("User:",res.data.user);
-     }
-     catch(e){
-      console.log("Error:",e);
-     }
-   }
-   authenticate();
-  },[])
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-blue-50 to-blue-200">
       {/* Hero Section */}
