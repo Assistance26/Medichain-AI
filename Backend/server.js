@@ -31,8 +31,10 @@ app.use((req, res, next) => {
 // Import Routes
 const chatbotRoutes = require("./routes/chatbotRoutes");
 const sentimentRoutes = require("./routes/sentimentRoutes");
+const videoRoutes = require("./routes/videoRoutes");
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/sentiment", sentimentRoutes);
+app.use("/api/video", videoRoutes);
 
 // Twilio Credentials
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -72,20 +74,54 @@ app.post("/send-email", async (req, res) => {
     }
 });
 
-// Twilio Token Route
-app.post("/api/token", (req, res) => {
-    const { identity, room } = req.body;
-    if (!identity || !room) return res.status(400).json({ error: "Identity and Room Name are required!" });
+// Video Call Token Generation
+app.post('/api/token', async (req, res) => {
+    console.log("Received token request:", req.body);
+    
+    const { appointmentId, userType, userName } = req.body;
+    
+    // Validate required parameters
+    if (!appointmentId || !userType || !userName) {
+        console.error("Missing required parameters:", { appointmentId, userType, userName });
+        return res.status(400).json({ 
+            error: 'Missing required parameters',
+            required: ['appointmentId', 'userType', 'userName']
+        });
+    }
+    
     try {
-        // const uniqueIdentity = `${identity}-${roomName}`;
-        const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity});
-        token.addGrant(new VideoGrant({ room }));
-        res.json({ token: token.toJwt() });
+        // Generate a unique room name based on appointment ID
+        const roomName = `appointment_1`;
+        
+        // Generate identity based on user type
+        const identity = userType === 'doctor' ? `Dr_${userName}` : userName;
+        
+        console.log("Generating token for:", { roomName, identity });
+        
+        // Create a new AccessToken instance
+        const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity });
+        
+        // Add a Video grant to the token
+        token.addGrant(new VideoGrant({ room: roomName }));
+        
+        // Generate the JWT token
+        const jwtToken = token.toJwt();
+        
+        res.json({ 
+            success: true,
+            token: jwtToken, 
+            roomName, 
+            identity 
+        });
     } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error('Error generating token:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to generate token',
+            details: error.message 
+        });
     }
 });
-
 
 app.get('/login', async(req, res) => {
     const {email, password} = req.query;

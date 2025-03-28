@@ -3,62 +3,60 @@ import { connect } from "twilio-video";
 import { motion } from "framer-motion";
 import { FiMic, FiMicOff } from "react-icons/fi";
 
-const VideoCall = () => {
-  const [roomName, setRoomName] = useState("");
-  const [identity, setIdentity] = useState("");
+const VideoCall = ({ roomName, identity, onClose }) => {
   const [room, setRoom] = useState(null);
   const [isMicOn, setIsMicOn] = useState(true);
   const videoRef = useRef(null);
 
-  // Fetch Twilio token from backend
+  // 🔥 Fetch Twilio token from backend
   const getToken = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identity, room: roomName }),
+        body: JSON.stringify({ appointmentId: roomName, userType: identity.includes("Dr_") ? "doctor" : "patient", userName: identity.replace("Dr_", "") }),
       });
-  
-      // Log the raw response to debug issues
-      const text = await response.text();
-      console.log("Raw Response:", text);
-  
-      // Check if response is valid JSON
-      try {
-        const data = JSON.parse(text);
-        return data.token || null;
-      } catch (jsonError) {
-        console.error("Invalid JSON response:", text);
-        return null;
+
+      // Parse response and extract token
+      const data = await response.json();
+      if (!data.success || !data.token) {
+        throw new Error(data.error || "Failed to get token");
       }
+      return data.token;
     } catch (error) {
       console.error("Error fetching token:", error);
       return null;
     }
   };
-  
 
-  // Join Room
+  // 🎥 Join Room Automatically
   const joinRoom = async () => {
-    if (!identity || !roomName) {
-      alert("Please enter Identity & Room Name!");
+    if (!roomName || !identity) {
+      console.error("Missing roomName or identity");
       return;
     }
+
     try {
       const token = await getToken();
-      if (!token) return;
-      
+      if (!token) {
+        alert("Failed to join the room. Please try again.");
+        return;
+      }
+
       const newRoom = await connect(token, { name: roomName });
       setRoom(newRoom);
-      console.log("Joined room:", roomName);
+      console.log(`✅ Joined room: ${roomName}`);
 
+      // 🎥 Attach local tracks to the video container
       newRoom.localParticipant.tracks.forEach((publication) => {
         if (publication.track) {
           videoRef.current.appendChild(publication.track.attach());
         }
       });
 
+      // 🎥 Attach remote tracks when participant joins
       newRoom.on("participantConnected", (participant) => {
+        console.log(`${participant.identity} joined`);
         participant.tracks.forEach((publication) => {
           if (publication.track) {
             videoRef.current.appendChild(publication.track.attach());
@@ -66,76 +64,76 @@ const VideoCall = () => {
         });
       });
 
+      // ❌ Handle participant disconnection
       newRoom.on("participantDisconnected", (participant) => {
         console.log(`${participant.identity} left.`);
+        participant.tracks.forEach((publication) => {
+          if (publication.track) {
+            publication.track.detach().forEach((element) => element.remove());
+          }
+        });
       });
 
+      // 🔌 Handle disconnection
       newRoom.on("disconnected", () => {
+        console.log("Room disconnected.");
         setRoom(null);
+        onClose(); // Notify parent to close video call
       });
     } catch (error) {
       console.error("Error joining room:", error);
     }
   };
 
-  // Leave Room
+  // 🚪 Leave Room
   const leaveRoom = () => {
     if (room) {
       room.disconnect();
       setRoom(null);
+      onClose(); // Notify parent to close video call
     }
   };
 
-  // Toggle Microphone
+  // 🎤 Toggle Microphone
   const toggleMic = () => {
-    setIsMicOn((prev) => !prev);
+    if (room) {
+      room.localParticipant.audioTracks.forEach((publication) => {
+        if (publication.track) {
+          if (isMicOn) {
+            publication.track.disable();
+          } else {
+            publication.track.enable();
+          }
+        }
+      });
+      setIsMicOn((prev) => !prev);
+    }
   };
 
+  // 🔥 Auto-Join Room on Mount
   useEffect(() => {
+    joinRoom();
     return () => {
       if (room) {
         room.disconnect();
       }
     };
-  }, [room]);
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <div className="flex flex-col items-center p-6 min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-black">
-      <motion.h2 
+      <motion.h2
         className="text-4xl font-extrabold mb-6 text-white shadow-lg"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        🎥 Video Call
+        🎥 Video Call - {identity}
       </motion.h2>
 
-      <motion.input
-        className="border p-3 m-2 rounded-lg bg-white/20 backdrop-blur-md shadow-xl text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400"
-        type="text"
-        placeholder="Enter Identity"
-        value={identity}
-        onChange={(e) => setIdentity(e.target.value)}
-        whileFocus={{ scale: 1.05 }}
-      />
-
-      <motion.input
-        className="border p-3 m-2 rounded-lg bg-white/20 backdrop-blur-md shadow-xl text-white placeholder-gray-300 focus:ring-2 focus:ring-green-400"
-        type="text"
-        placeholder="Enter Room Name"
-        value={roomName}
-        onChange={(e) => setRoomName(e.target.value)}
-        whileFocus={{ scale: 1.05 }}
-      />
-
-      {!room ? (
-        <motion.button
-          className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg mt-4 shadow-xl hover:shadow-blue-500/50 transition-transform transform hover:scale-105 active:scale-95"
-          onClick={joinRoom}
-        >
-          🎥 Join Room
-        </motion.button>
-      ) : (
+      {/* Leave Room Button */}
+      {room && (
         <motion.button
           className="bg-red-500 text-white px-6 py-3 rounded-lg mt-4 shadow-xl hover:shadow-red-500/50 transition-transform transform hover:scale-105 active:scale-95"
           onClick={leaveRoom}
@@ -144,7 +142,7 @@ const VideoCall = () => {
         </motion.button>
       )}
 
-      {/* Toggle Mic Button */}
+      {/* Toggle Microphone */}
       {room && (
         <motion.button
           className={`mt-4 flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg ${
@@ -170,9 +168,7 @@ const VideoCall = () => {
             ✅ Connected to Room: {roomName}
           </p>
         ) : (
-          <p className="text-red-300 text-lg font-semibold">
-            ❌ Not in a Room
-          </p>
+          <p className="text-red-300 text-lg font-semibold">❌ Not in a Room</p>
         )}
       </motion.div>
     </div>

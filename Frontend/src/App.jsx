@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import Chatbot from "./components/Chatbot";
 import ChatbotProvider from "./context/ChatbotContext";
 import DoctorLogin from "./pages/DoctorLogin.jsx";
+import InsuranceDashBoared from "./pages/InsuranceDashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -117,6 +118,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Chatbot />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/insurance-dashboard"
+            element={
+              <ProtectedRoute>
+                <InsuranceDashBoared />
               </ProtectedRoute>
             }
           />
