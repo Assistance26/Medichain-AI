@@ -319,7 +319,29 @@ app.post('/appointment', async (req, res) => {
     }
 });
 
+app.get('/allUsers', async (req, res) => {
+    const fetch = await User.find();
+    try{
+    if(fetch)
+        res.json({status:"Fetched Successfully", users: fetch});
+}
+catch(e){
+    res.status(500).json({ status:"Internal Server Error"});
+}
+})
 
+app.post('/removeUser', async (req, res) => {
+    const {userId} = req.body;
+    console.log(userId);
+    try{
+        const del = await User.findByIdAndDelete(userId);
+        if(del)
+            res.json({status:'User Removed',delete: del});
+    }
+    catch(e){
+        res.status(500).json({status:"Internal Server Error"});
+    }
+})
 
 app.get('/fetchDates', async (req, res) => {
     const {name} = req.query;
