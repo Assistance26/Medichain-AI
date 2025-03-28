@@ -129,6 +129,13 @@ const Login = () => {
         handleSetUser({ name: res.data.user.name, email, role: "doctor" });
         navigate("/DoctorDashboard", { state: { doctor: res.data.user } });
       } 
+      else if (res.data.status === "Admin found") {
+        console.log("Admin:", res.data.user);
+
+        // Set doctor role and navigate to dashboard
+        handleSetUser({ name: res.data.user.name, email, role: "admin" });
+        navigate("/AdminDashboard", { state: { admin: res.data.user } });
+      } 
       else {
         console.log("User doesn't exist");
         alert("Email or password incorrect");
