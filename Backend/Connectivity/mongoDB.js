@@ -7,10 +7,20 @@ const UserSchema = new mongoose.Schema({
     },
     email:{
         type:String,
-        required: true
+        required: true,
+        unique: true
     },
     password:{
         type:String,
+        required: true
+    },
+    number:{
+        type: String,
+        required: true
+    },
+    role:{
+        type: String,
+        enum: ["Patient", "Doctor"],
         required: true
     },
     appointmentAt:{
@@ -25,7 +35,6 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: false
     }
-
 })
 const adminSchema = new mongoose.Schema({
     name:{

@@ -154,17 +154,59 @@ app.get('/login', async(req, res) => {
     }
 });
 
-// User Signup with Email Notification
-
-app.post('/signup', async (req, res) => {
-    const { name, email, password } = req.body;
+// Unified Signup Route
+app.post('/unified-signup', async (req, res) => {
+    const { name, email, number, password, role, specialization, licenseNumber, experience, publications } = req.body;
+    
     try {
-        const connection = await User.findOne({email});
-        if(connection)
-            res.json({status:"User Already Exists"});
-        else{
-            const user = await User.create({name: name, email: email, password: password});
-            res.json({status:"User Created", user:user});
+        // Check if user already exists in either collection
+        const existingUser = await User.findOne({ email });
+        const existingDoctor = await Doctor.findOne({ email });
+        
+        if (existingUser || existingDoctor) {
+            return res.json({ status: "User Already Exists" });
+        }
+
+        if (role === "Doctor") {
+            // Create doctor account
+            const doctor = await Doctor.create({
+                name,
+                email,
+                number,
+                password,
+                specialization,
+                licenseNumber,
+                Experience: experience,
+                publications,
+                approval: "pending"
+            });
+
+            // Send welcome email
+            await sendEmail(
+                email,
+                "Doctor Registration Successful",
+                `Dear Dr. ${name},\n\nYour account has been created successfully and is pending approval. We will notify you once your account is approved.\n\nBest regards,\nMediChain AI Team`
+            );
+
+            return res.json({ status: "Created Successfully", doctor });
+        } else {
+            // Create patient account
+            const user = await User.create({
+                name,
+                email,
+                number,
+                password,
+                role: "Patient"
+            });
+
+            // Send welcome email
+            await sendEmail(
+                email,
+                "Patient Registration Successful",
+                `Dear ${name},\n\nYour account has been created successfully. You can now log in and access your health records.\n\nBest regards,\nMediChain AI Team`
+            );
+
+            return res.json({ status: "User Created", user });
         }
     } catch (error) {
         console.error("Signup Error:", error);
@@ -172,13 +214,69 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-app.post("/DoctorSignIn", async (req, res) => {
-    const { email, name, number, specialization, licenseNumber, experience, publications, password } = req.body;
+// Update existing signup route to handle only patient registration
+app.post('/signup', async (req, res) => {
+    const { name, email, number, password } = req.body;
     try {
-        if (await Doctor.findOne({ email })) 
+        const existingUser = await User.findOne({ email });
+        const existingDoctor = await Doctor.findOne({ email });
+        
+        if (existingUser || existingDoctor) {
+            return res.json({ status: "User Already Exists" });
+        }
+
+        const user = await User.create({
+            name,
+            email,
+            number,
+            password,
+            role: "Patient"
+        });
+
+        // Send welcome email
+        await sendEmail(
+            email,
+            "Patient Registration Successful",
+            `Dear ${name},\n\nYour account has been created successfully. You can now log in and access your health records.\n\nBest regards,\nMediChain AI Team`
+        );
+
+        res.json({ status: "User Created", user });
+    } catch (error) {
+        console.error("Signup Error:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// Update DoctorSignIn route to handle only doctor registration
+app.post("/DoctorSignIn", async (req, res) => {
+    const { name, email, number, specialization, licenseNumber, experience, publications, password } = req.body;
+    try {
+        const existingUser = await User.findOne({ email });
+        const existingDoctor = await Doctor.findOne({ email });
+        
+        if (existingUser || existingDoctor) {
             return res.json({ status: "Account Already Exists" });
-        const doctor = await Doctor.create({ name, email, number, specialization, licenseNumber, Experience: experience, publications, password, approval: "pending" });
-        sendEmail(email, "Doctor Registration Successful", `Dear Dr. ${name}, your account has been created successfully.`);
+        }
+
+        const doctor = await Doctor.create({
+            name,
+            email,
+            number,
+            specialization,
+            licenseNumber,
+            Experience: experience,
+            publications,
+            password,
+            approval: "pending"
+        });
+
+        // Send welcome email
+        await sendEmail(
+            email,
+            "Doctor Registration Successful",
+            `Dear Dr. ${name},\n\nYour account has been created successfully and is pending approval. We will notify you once your account is approved.\n\nBest regards,\nMediChain AI Team`
+        );
+
         res.json({ status: "Created Successfully", doctor });
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
