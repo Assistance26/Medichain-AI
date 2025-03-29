@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-// import { useAuth } from "../contexts/AuthContext";
+import axios from "axios";
 
 const AdminSignup = () => {
   const [formData, setFormData] = useState({
@@ -10,63 +9,42 @@ const AdminSignup = () => {
     password: "",
     role: "Admin",
   });
-  // const { account, contract } = useAuth();
-  const roles = ["Patient", "Doctor", "Admin"];
-  const navigate = useNavigate()
+
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    const { name, email, password, role } = formData;
+    const { name, email, password } = formData;
 
-    const roleMap = {
-      Patient: 0,
-      Doctor: 1,
-      Admin: 2,
-    };
+    try {
+      const res = await axios.post("http://localhost:5000/adminSignup", {
+        name,
+        email,
+        password,
+      });
 
-
-    //block chain based auth
-
-  //   try {
-  //     await contract.methods
-  //       .register(name, email, password, roleMap[role])
-  //       .send({ from: account });
-  //     alert("User registered successfully");
-  //     navigate("/login")
-  //   } catch (error) {
-  //     console.error("Registration error", error);
-  //   }
-  // };
-
-  //normal auth
-
-  try{
-    const res = await axios.post("http://localhost:5000/adminSignup", {
-      name,
-      email,
-      password,
-    });
-    if (res.data.status === "User Already Exists") {
-      alert("Admin Already Exists");
-    } 
-    else {
-      alert("Admin Account Created");
-      console.log(res.data.admin);
-      navigate("/login");
+      if (res.data.status === "User Already Exists") {
+        alert("Admin Already Exists");
+      } else {
+        alert("Admin Account Created");
+        console.log(res.data.admin);
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Signup Error:", error);
+      alert("An error occurred. Please try again.");
     }
-  } catch (e) {
-    console.error("Signup Error:", e);
-    alert("An error occurred. Please try again.");
-}
+  };
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <form onSubmit={handleSignup} className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-semibold text-center mb-4">Admin Sign Up</h2>
-        
+
         <input
           type="text"
           name="name"
@@ -76,7 +54,7 @@ const AdminSignup = () => {
           className="w-full p-2 mb-3 border rounded-md"
           required
         />
-        
+
         <input
           type="email"
           name="email"
@@ -97,19 +75,19 @@ const AdminSignup = () => {
           required
         />
 
-        <button type="submit" className="bg-primary text-white w-full p-2 rounded-md">
+        <button type="submit" className="bg-blue-500 text-white w-full p-2 rounded-md">
           Sign Up
         </button>
 
         <p className="text-center mt-3 text-sm">
-          Already have an account? {" "}
-          <a href="/login" className="text-primary underline">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-500 underline">
             Login
           </a>
         </p>
       </form>
     </div>
   );
-}};
+};
 
 export default AdminSignup;

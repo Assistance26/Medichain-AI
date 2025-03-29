@@ -26,7 +26,7 @@ const DoctorRegistration = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try{
-      const res = await axios.post('http://localhost:5000/DoctorSignIn',{
+      const res = await axios.post('http://localhost:5000/DoctorSignUp',{
         name,email,number,specialization, licenseNumber, experience, publications, password
       });
       if(res.data.status=="Created Successfully"){
@@ -34,6 +34,8 @@ const DoctorRegistration = () => {
        console.log(res.data.doctor);
        navigate('/login');
       }
+      else if(res.data.status === "Use different password")
+        alert("Use different password");
       else
       alert("Account Already Exists");
     }
@@ -136,7 +138,7 @@ const DoctorRegistration = () => {
         )}
         <p className="text-center mt-3 text-sm">
           Already have an account?{" "}
-          <a href="/DoctorLogin" className="text-primary underline">
+          <a href="/login" className="text-primary underline">
             Login
           </a>
         </p>

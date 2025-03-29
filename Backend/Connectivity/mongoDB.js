@@ -14,15 +14,15 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
     appointmentAt:{
-        type: String,
+        type: [String],
         required: false
     },
     appointmentWith:{
-        type: String,
+        type: [String],
         required: false
     },
     timeSlot:{
-        type: String,
+        type: [String],
         required: false
     }
 

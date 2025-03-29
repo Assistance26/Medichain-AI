@@ -127,7 +127,7 @@ const Login = () => {
 
         // Set doctor role and navigate to dashboard
         handleSetUser({ name: res.data.user.name, email, role: "doctor" });
-        navigate("/DoctorDashboard", { state: { doctor: res.data.user } });
+        navigate("/dashboard", { state: { doctor: res.data.user } });
       } 
       else if (res.data.status === "Admin found") {
         console.log("Admin:", res.data.user);
@@ -177,7 +177,7 @@ const Login = () => {
 
         <p className="text-center mt-3 text-sm">
           Don't have an account?{" "}
-          <a href="/signup" className="text-primary underline">
+          <a href="/LoginSelection" className="text-primary underline">
             Sign Up
           </a>
         </p>
