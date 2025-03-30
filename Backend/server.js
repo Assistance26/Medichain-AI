@@ -8,7 +8,7 @@ const net = require('net');
 const twilio = require("twilio");
 const nodemailer = require("nodemailer");
 const { Doctor, User, Admin } = require("./Connectivity/mongoDB");
-const jwt = require('jsonwebtoken')
+
 // Initialize Express app with WebSocket support
 const app = express();
 expressWs(app);
@@ -127,30 +127,24 @@ app.get('/login', async(req, res) => {
     const {email, password} = req.query;
     console.log(email,password);
     try{
-        const check = await User.findOne({password});
-        const checkDoctor = await Doctor.findOne({password});
-        const checkAdmin = await Admin.findOne({password});
+        const check = await User.findOne({email});
+        const checkDoctor = await Doctor.findOne({email});
+        const checkAdmin = await Admin.findOne({email});
         console.log(check);
         if(check){
-            const user = {name:check.name, email: check.email, password: check.password}
-            const token = jwt.sign(user, 'iamFJ', {expiresIn:'1h'});
-            console.log("User Login");
-            console.log(check);
-            res.json({status:"User found", user: check, token: token});
+        console.log("User Login");
+        console.log(check);
+        res.json({status:"User found", user: check});
         }
         else if(checkDoctor){
-            const user = {name:checkDoctor.name, email: checkDoctor.email, password: checkDoctor.password}
-            const token = jwt.sign(user, 'iamFJ', {expiresIn:'1h'});
             console.log("Doctor Login");
             console.log(checkDoctor);
-            res.json({status:"Doctor found", user: checkDoctor, token: token});
+        res.json({status:"Doctor found", user: checkDoctor});
         }
         else if(checkAdmin){
-            const user = {name:checkAdmin.name, email: checkAdmin.email, password: checkAdmin.password}
-            const token = jwt.sign(user, 'iamFJ', {expiresIn:'1h'});
             console.log("Admin Login");
             console.log(checkAdmin);
-            res.json({status:"Admin found", user: checkAdmin, token: token});
+        res.json({status:"Admin found", user: checkAdmin});
         }
         else
         res.json({status:"Does not exists"});
@@ -160,22 +154,59 @@ app.get('/login', async(req, res) => {
     }
 });
 
-// User Signup with Email Notification
-
-app.post('/signup', async (req, res) => {
-    const { name, email, password } = req.body;
+// Unified Signup Route
+app.post('/unified-signup', async (req, res) => {
+    const { name, email, number, password, role, specialization, licenseNumber, experience, publications } = req.body;
+    
     try {
-        const admin = await Admin.findOne({password});
-        const doctor = await Doctor.findOne({password});
-        const connection = await User.findOne({password});
-        if(connection)
-            res.json({status:"User Already Exists"});
-        else if(admin || doctor){
-            return res.json({status:"Use different password"});
+        // Check if user already exists in either collection
+        const existingUser = await User.findOne({ email });
+        const existingDoctor = await Doctor.findOne({ email });
+        
+        if (existingUser || existingDoctor) {
+            return res.json({ status: "User Already Exists" });
         }
-        else{
-            const user = await User.create({name: name, email: email, password: password});
-            res.json({status:"User Created", user:user});
+
+        if (role === "Doctor") {
+            // Create doctor account
+            const doctor = await Doctor.create({
+                name,
+                email,
+                number,
+                password,
+                specialization,
+                licenseNumber,
+                Experience: experience,
+                publications,
+                approval: "pending"
+            });
+
+            // Send welcome email
+            await sendEmail(
+                email,
+                "Doctor Registration Successful",
+                `Dear Dr. ${name},\n\nYour account has been created successfully and is pending approval. We will notify you once your account is approved.\n\nBest regards,\nMediChain AI Team`
+            );
+
+            return res.json({ status: "Created Successfully", doctor });
+        } else {
+            // Create patient account
+            const user = await User.create({
+                name,
+                email,
+                number,
+                password,
+                role: "Patient"
+            });
+
+            // Send welcome email
+            await sendEmail(
+                email,
+                "Patient Registration Successful",
+                `Dear ${name},\n\nYour account has been created successfully. You can now log in and access your health records.\n\nBest regards,\nMediChain AI Team`
+            );
+
+            return res.json({ status: "User Created", user });
         }
     } catch (error) {
         console.error("Signup Error:", error);
@@ -183,18 +214,69 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-app.post("/DoctorSignUp", async (req, res) => {
-    const { email, name, number, specialization, licenseNumber, experience, publications, password } = req.body;
-    const user = await User.findOne({password});
-    const admin = await Admin.fineOne({password});
+// Update existing signup route to handle only patient registration
+app.post('/signup', async (req, res) => {
+    const { name, email, number, password } = req.body;
     try {
-        if (await Doctor.findOne({ password })) 
-            return res.json({ status: "Account Already Exists" });
-        else if(user || admin){
-            return res.json({ status: "Use different password" });
+        const existingUser = await User.findOne({ email });
+        const existingDoctor = await Doctor.findOne({ email });
+        
+        if (existingUser || existingDoctor) {
+            return res.json({ status: "User Already Exists" });
         }
-        const doctor = await Doctor.create({ name, email, number, specialization, licenseNumber, Experience: experience, publications, password, approval: "pending" });
-        sendEmail(email, "Doctor Registration Successful", `Dear Dr. ${name}, your account has been created successfully.`);
+
+        const user = await User.create({
+            name,
+            email,
+            number,
+            password,
+            role: "Patient"
+        });
+
+        // Send welcome email
+        await sendEmail(
+            email,
+            "Patient Registration Successful",
+            `Dear ${name},\n\nYour account has been created successfully. You can now log in and access your health records.\n\nBest regards,\nMediChain AI Team`
+        );
+
+        res.json({ status: "User Created", user });
+    } catch (error) {
+        console.error("Signup Error:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// Update DoctorSignIn route to handle only doctor registration
+app.post("/DoctorSignIn", async (req, res) => {
+    const { name, email, number, specialization, licenseNumber, experience, publications, password } = req.body;
+    try {
+        const existingUser = await User.findOne({ email });
+        const existingDoctor = await Doctor.findOne({ email });
+        
+        if (existingUser || existingDoctor) {
+            return res.json({ status: "Account Already Exists" });
+        }
+
+        const doctor = await Doctor.create({
+            name,
+            email,
+            number,
+            specialization,
+            licenseNumber,
+            Experience: experience,
+            publications,
+            password,
+            approval: "pending"
+        });
+
+        // Send welcome email
+        await sendEmail(
+            email,
+            "Doctor Registration Successful",
+            `Dear Dr. ${name},\n\nYour account has been created successfully and is pending approval. We will notify you once your account is approved.\n\nBest regards,\nMediChain AI Team`
+        );
+
         res.json({ status: "Created Successfully", doctor });
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
@@ -204,14 +286,9 @@ app.post("/DoctorSignUp", async (req, res) => {
 app.post('/adminSignup', async (req, res) => {
     const { name, email, password } = req.body;
     try {
-        const user = await User.findOne({password});
-        const doctor = await Doctor.findOne({password});
         const connection = await Admin.findOne({email});
         if(connection)
             res.json({status:"User Already Exists"});
-        else if(user || doctor){
-            return res.json({status:"Use different password"});
-        }
         else{
             const user = await Admin.create({name: name, email: email, password: password});
             res.json({status:"User Created", user:user});
@@ -220,28 +297,6 @@ app.post('/adminSignup', async (req, res) => {
         console.error("Signup Error:", error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
-})
-
-function Authentication(req, res, next){
-    const authHeader = req.headers['authorization'];
-    if(!authHeader){
-        res.status(500).json({error:"Internal Error"});
-    }
-    const token = authHeader.split(' ')[1];
-    if(!token)
-        return res.status(401).json({ message: "Token is missing from Authorization header" });
-    jwt.verify(token, 'iamFJ', (err, user) => {
-        if(err)
-            return res.status(505).json({error:"Not Found"});
-        req.user = user;
-        req.token = token;
-        next();
-    })
-}
-
-app.get('/authenticate',Authentication, async (req,res) => {
-   if(req.user)
-    res.json({status:"User Authenticated", user:req.user});
 })
 
 app.get('/pendingDoctors', async (req, res) => {

@@ -1,8 +1,15 @@
 import { useLocation } from "react-router-dom";
-import { useState } from "react";
+  import { useState,useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../context/AuthContext";
-import axios from "axios";
+import {ChatbotContext} from '../context/ChatbotContext';
+import axios from 'axios';
+// import { useAuth } from "../contexts/AuthContext";
+import { AuthContext } from "../context/AuthContext";
+
+const bookedAppointments = {
+  "2025-03-16": ["10:00 AM", "4:00 PM"],
+  "2025-03-11": ["11:30 AM"],
+};
 
 // Generate the next 7 days dynamically
 const getNextSevenDays = () => {
@@ -24,64 +31,60 @@ const getNextSevenDays = () => {
 const timeSlots = ["10:00 AM", "11:30 AM", "2:00 PM", "4:00 PM", "6:00 PM"];
 
 const DoctorProfile = () => {
-  const { user } = useAuth();
+  // const {user,setUser} = useContext(ChatbotContext);
+  const {user} = useContext(AuthContext);
+  // const {authUser} = useAuth();
   const location = useLocation();
   const doctor = location.state || {};
 
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
-  const [bookedAppointments, setBookedAppointments] = useState({});
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const availableDates = getNextSevenDays();
 
   const handleBookAppointment = async () => {
-    if (!doctor?.name) {
-      alert("Please select a doctor.");
-      return;
+    if (!doctor || !doctor.name) {
+        console.error("Doctor name is missing");
+        alert("Please select a doctor");
+        return;
     }
 
-    if (!user?.email) {
-      alert("Please log in first.");
-      return;
+    if (!user || !user.email) {
+        console.error("User not logged in");
+        alert("Please log in first");
+        return;
     }
 
     if (!selectedDate || !selectedTime) {
-      alert("Please select a date and time.");
-      return;
+        console.error("Date or time is missing");
+        alert("Please select date and time");
+        return;
     }
 
-    console.log("Booking:", doctor.name, selectedDate, selectedTime, "for:", user.email);
+    console.log(doctor.name, ":", selectedDate, ",", selectedTime, "with:", user.email);
 
     try {
-      const res = await axios.post("http://localhost:5000/appointment", {
-        Docname: doctor.name,
-        appointmentAt: selectedDate,
-        timeSlot: selectedTime,
-        PatientName: user.name,
-      });
+        const res = await axios.post("http://localhost:5000/appointment", {
+            Docname: doctor.name,
+            appointmentAt: selectedDate,
+            timeSlot: selectedTime,
+            PatientName: user.name
+        });
 
-      if (res.data.status === "fixed") {
-        alert("Appointment booked successfully!");
-
-        // Mark selected time slot as booked
-        setBookedAppointments((prev) => ({
-          ...prev,
-          [selectedDate]: [...(prev[selectedDate] || []), selectedTime],
-        }));
-
-        // Reset selection & show confirmation
-        setSelectedTime("");
-        setShowConfirmation(true);
-        setTimeout(() => setShowConfirmation(false), 3000);
-      } else {
-        alert(res.data.status);
-      }
-    } catch (error) {
-      console.error("Error booking appointment:", error);
-      alert("Something went wrong! Check console.");
+        if (res.data.status === 'fixed') {
+            console.log("Done:", res.data.date);
+            alert("Appointment fixed!");
+        } else {
+            console.log("Issue:", res.data.status);
+            alert(res.data.status);
+        }
+    } catch (e) {
+        console.error("Error booking appointment:", e);
+        alert("Something went wrong! Check console.");
     }
-  };
+};
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-6">
@@ -121,7 +124,9 @@ const DoctorProfile = () => {
 
         {/* Date Selection */}
         <div className="mt-6">
-          <label className="block text-gray-800 font-semibold text-lg mb-2">Select a Booking Date:</label>
+          <label className="block text-gray-800 font-semibold text-lg mb-2">
+            Select a Booking Date:
+          </label>
           <div className="flex gap-3 justify-center md:justify-start">
             {availableDates.map((d) => (
               <button
@@ -134,6 +139,7 @@ const DoctorProfile = () => {
                 onClick={() => {
                   setSelectedDate(d.fullDate);
                   setSelectedTime("");
+                  
                 }}
               >
                 <span>{d.day}</span>
@@ -151,7 +157,9 @@ const DoctorProfile = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <label className="block text-gray-800 font-semibold text-lg mb-2">Select a Time Slot:</label>
+            <label className="block text-gray-800 font-semibold text-lg mb-2">
+              Select a Time Slot:
+            </label>
             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
               {timeSlots.map((time) => {
                 const isBooked =

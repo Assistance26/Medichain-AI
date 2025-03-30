@@ -29,7 +29,7 @@ const Appointment = () => {
         if (data.status === "fetched") {
           setAppointment(data.appointment);
         } else {
-          setAppointment(null);
+          setAppointment(null); // Handle no appointment found
         }
       } catch (error) {
         console.error("Error fetching appointment:", error);
@@ -55,18 +55,6 @@ const Appointment = () => {
 
   const closeVideoCall = () => {
     setIsVideoCallActive(false);
-  };
-
-  const handleCancelAppointment = async () => {
-    setAppointment(null);
-    setShowCancelPopup(false);
-    try {
-      await axios.post(`http://localhost:5000/cancelAppointment/${appointment._id}`);
-      
-      
-    } catch (error) {
-      console.error("Error canceling appointment:", error);
-    }
   };
 
   return (
