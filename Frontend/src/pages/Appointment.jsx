@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaVideo, FaTimes } from "react-icons/fa";
-import VideoCall from "../components/VideoCall"; // Import the Twilio VideoCall component
+import VideoCall from "../components/VideoCall";
 import { useUser } from "../context/AuthContext";
 import axios from "axios";
 
@@ -10,29 +10,31 @@ const Appointment = () => {
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
   const [roomName, setRoomName] = useState("");
   const [identity, setIdentity] = useState("");
-  const [loading, setLoading] = useState(true); // New state to handle loading
+  const [loading, setLoading] = useState(true);
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
   const { user } = useUser();
 
   useEffect(() => {
     const fetchAppointment = async () => {
       try {
         const email = user.email;
-        console.log("user email at the frontend: ", email);
+        console.log("User email at the frontend: ", email);
         const response = await axios.get("http://localhost:5000/UserWithAppointment", {
           params: { email: email },
         });
+
         const data = response.data;
-        console.log("appointment data:", data);
+        console.log("Appointment data:", data.appointment);
 
         if (data.status === "fetched") {
-          setAppointment(data.appointment); // Set the single appointment data
+          setAppointment(data.appointment);
         } else {
-          setAppointment(null); // Handle no appointment found
+          setAppointment(null);
         }
       } catch (error) {
         console.error("Error fetching appointment:", error);
       } finally {
-        setLoading(false); // Set loading to false when done
+        setLoading(false);
       }
     };
 
@@ -53,6 +55,18 @@ const Appointment = () => {
 
   const closeVideoCall = () => {
     setIsVideoCallActive(false);
+  };
+
+  const handleCancelAppointment = async () => {
+    setAppointment(null);
+    setShowCancelPopup(false);
+    try {
+      await axios.post(`http://localhost:5000/cancelAppointment/${appointment._id}`);
+      
+      
+    } catch (error) {
+      console.error("Error canceling appointment:", error);
+    }
   };
 
   return (
@@ -78,6 +92,37 @@ const Appointment = () => {
             >
               <FaVideo /> Join
             </button>
+
+            <button
+              onClick={() => setShowCancelPopup(true)}
+              className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+            >
+              <FaTimes /> Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Popup */}
+      {showCancelPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h3 className="text-lg font-semibold mb-4">Cancel Appointment?</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to cancel this appointment?</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={handleCancelAppointment}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+              >
+                Yes, Cancel
+              </button>
+              <button
+                onClick={() => setShowCancelPopup(false)}
+                className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
+              >
+                No, Keep It
+              </button>
+            </div>
           </div>
         </div>
       )}
