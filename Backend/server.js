@@ -74,54 +74,113 @@ app.post("/send-email", async (req, res) => {
     }
 });
 
-// Video Call Token Generation
+// // Video Call Token Generation
+// app.post('/api/token', async (req, res) => {
+//     console.log("Received token request:", req.body);
+    
+//     const { appointmentId, userType, userName } = req.body;
+    
+//     // Validate required parameters
+//     if (!appointmentId || !userType || !userName) {
+//         console.error("Missing required parameters:", { appointmentId, userType, userName });
+//         return res.status(400).json({ 
+//             error: 'Missing required parameters',
+//             required: ['appointmentId', 'userType', 'userName']
+//         });
+//     }
+    
+//     try {
+//         // Generate a unique room name based on appointment ID
+//         const roomName = `appointment_1`;
+        
+//         // Generate identity based on user type
+//         const identity = userType === 'doctor' ? `Dr_${userName}` : userName;
+        
+//         console.log("Generating token for:", { roomName, identity });
+        
+//         // Create a new AccessToken instance
+//         const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity });
+        
+//         // Add a Video grant to the token
+//         token.addGrant(new VideoGrant({ room: roomName }));
+        
+//         // Generate the JWT token
+//         const jwtToken = token.toJwt();
+        
+//         res.json({ 
+//             success: true,
+//             token: jwtToken, 
+//             roomName, 
+//             identity 
+//         });
+//     } catch (error) {
+//         console.error('Error generating token:', error);
+//         res.status(500).json({ 
+//             success: false,
+//             error: 'Failed to generate token',
+//             details: error.message 
+//         });
+//     }
+// });
+
 app.post('/api/token', async (req, res) => {
-    console.log("Received token request:", req.body);
-    
+    console.log("🔍 Received token request:", req.body);
+
     const { appointmentId, userType, userName } = req.body;
-    
-    // Validate required parameters
+
+    // ✅ Validate required parameters
     if (!appointmentId || !userType || !userName) {
-        console.error("Missing required parameters:", { appointmentId, userType, userName });
-        return res.status(400).json({ 
+        console.error("❌ Missing parameters:", { appointmentId, userType, userName });
+        return res.status(400).json({
             error: 'Missing required parameters',
             required: ['appointmentId', 'userType', 'userName']
         });
     }
-    
+
     try {
-        // Generate a unique room name based on appointment ID
+        // ✅ Fixed roomName (should use dynamic appointment ID)
         const roomName = `appointment_1`;
-        
-        // Generate identity based on user type
+
+        // ✅ Generate identity correctly
         const identity = userType === 'doctor' ? `Dr_${userName}` : userName;
-        
-        console.log("Generating token for:", { roomName, identity });
-        
-        // Create a new AccessToken instance
-        const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity });
-        
-        // Add a Video grant to the token
+
+        console.log("🔐 Generating token for:", { roomName, identity });
+
+        // ✅ Create a new AccessToken instance
+        const token = new AccessToken(
+            twilioAccountSid,
+            twilioApiKey,
+            twilioApiSecret,
+            { identity }
+        );
+
+        // ✅ Add Video grant to the token
         token.addGrant(new VideoGrant({ room: roomName }));
-        
-        // Generate the JWT token
+
+        // ✅ Token TTL (1 hour)
+        token.ttl = 3600;
+
+        // ✅ Generate JWT Token
         const jwtToken = token.toJwt();
-        
-        res.json({ 
+
+        console.log("✅ Token generated successfully:", jwtToken);
+
+        res.json({
             success: true,
-            token: jwtToken, 
-            roomName, 
-            identity 
+            token: jwtToken,
+            roomName,
+            identity
         });
     } catch (error) {
-        console.error('Error generating token:', error);
-        res.status(500).json({ 
+        console.error("❌ Error generating token:", error.message);
+        res.status(500).json({
             success: false,
-            error: 'Failed to generate token',
-            details: error.message 
+            error: "Failed to generate token",
+            details: error.message
         });
     }
 });
+
 
 app.get('/login', async(req, res) => {
     const {email, password} = req.query;
@@ -156,7 +215,7 @@ app.get('/login', async(req, res) => {
 
 // Unified Signup Route
 app.post('/unified-signup', async (req, res) => {
-    const { name, email, number, password, role, specialization, licenseNumber, experience, publications } = req.body;
+    const { name, email, number, password, specialization, licenseNumber, experience, publications, role } = req.body;
     
     try {
         // Check if user already exists in either collection
@@ -189,25 +248,7 @@ app.post('/unified-signup', async (req, res) => {
             );
 
             return res.json({ status: "Created Successfully", doctor });
-        } else {
-            // Create patient account
-            const user = await User.create({
-                name,
-                email,
-                number,
-                password,
-                role: "Patient"
-            });
-
-            // Send welcome email
-            await sendEmail(
-                email,
-                "Patient Registration Successful",
-                `Dear ${name},\n\nYour account has been created successfully. You can now log in and access your health records.\n\nBest regards,\nMediChain AI Team`
-            );
-
-            return res.json({ status: "User Created", user });
-        }
+        } 
     } catch (error) {
         console.error("Signup Error:", error);
         return res.status(500).json({ error: "Internal Server Error" });
@@ -362,124 +403,53 @@ catch(e){
 }
 })
 
-// app.post('/appointment', async (req, res) => {
-//     const { Docname, PatientName, timeSlot, appointmentAt } = req.body;
-//     console.log(Docname, ":", appointmentAt, ",", timeSlot, "with:", PatientName);
-
-//     try {
-//         const fix = await Doctor.findOne({ name: Docname });
-
-//         if (!fix) {
-//             console.log("Doctor not found:", Docname);
-//             return res.json({ status: "Doctor not found" });
-//         }
-
-//         const updated = await Doctor.findOneAndUpdate(
-//             { name: Docname },
-//             {
-//                 $push: {
-//                     appointmentWith: PatientName,  // ✅ Fixed push syntax
-//                     appointmentAt: appointmentAt,
-//                     timeSlot: timeSlot
-//                 }
-//             },
-//             { new: true }
-//         );
-
-//         const userUpdate = await User.findOneAndUpdate(
-//             { name: PatientName },
-//             {
-//                 $push: {
-//                     appointmentAt: appointmentAt,
-//                     timeSlot: timeSlot,
-//                     appointmentWith: Docname
-//                 }
-//             },
-//             { new: true }
-//         );
-
-//         if (!userUpdate) {
-//             console.log("User not found:", PatientName);
-//             return res.json({ status: "User not found" });
-//         }
-
-//         res.json({ status: "fixed", date: updated });
-//     } catch (e) {
-//         console.error("Error:", e);
-//         res.status(500).json({ status: "Internal Server Error" });
-//     }
-// });
-
 app.post('/appointment', async (req, res) => {
     const { Docname, PatientName, timeSlot, appointmentAt } = req.body;
-    console.log(`${Docname}: ${appointmentAt}, ${timeSlot} with: ${PatientName}`);
+    console.log(Docname, ":", appointmentAt, ",", timeSlot, "with:", PatientName);
 
     try {
-        // ✅ Check if Doctor exists
-        const doctor = await Doctor.findOne({ name: Docname });
+        const fix = await Doctor.findOne({ name: Docname });
 
-        if (!doctor) {
-            console.log("❌ Doctor not found:", Docname);
-            return res.status(404).json({ status: "Doctor not found" });
+        if (!fix) {
+            console.log("Doctor not found:", Docname);
+            return res.json({ status: "Doctor not found" });
         }
 
-        // ✅ Push to Doctor's Appointments
-        const updatedDoctor = await Doctor.findOneAndUpdate(
+        const updated = await Doctor.findOneAndUpdate(
             { name: Docname },
             {
                 $push: {
-                    appointments: {
-                        patientName: PatientName,
-                        appointmentAt: appointmentAt,
-                        timeSlot: timeSlot,
-                    },
-                },
+                    appointmentWith: PatientName,  // ✅ Fixed push syntax
+                    appointmentAt: appointmentAt,
+                    timeSlot: timeSlot
+                }
             },
             { new: true }
         );
 
-        // ✅ Check if User exists
-        const user = await User.findOne({ name: PatientName });
-
-        if (!user) {
-            console.log("❌ User not found:", PatientName);
-            return res.status(404).json({ status: "User not found" });
-        }
-
-        // ✅ Push to User's Appointments
-        const updatedUser = await User.findOneAndUpdate(
+        const userUpdate = await User.findOneAndUpdate(
             { name: PatientName },
             {
                 $push: {
-                    appointments: {
-                        doctorName: Docname,
-                        appointmentAt: appointmentAt,
-                        timeSlot: timeSlot,
-                    },
-                },
+                    appointmentAt: appointmentAt,
+                    timeSlot: timeSlot,
+                    appointmentWith: Docname
+                }
             },
             { new: true }
         );
 
-        // ✅ Check if update is successful
-        if (!updatedDoctor || !updatedUser) {
-            console.log("❌ Failed to update appointment.");
-            return res.status(500).json({ status: "Failed to update appointment" });
+        if (!userUpdate) {
+            console.log("User not found:", PatientName);
+            return res.json({ status: "User not found" });
         }
 
-        // ✅ Success Response
-        res.json({
-            status: "fixed",
-            message: "Appointment booked successfully!",
-            doctorAppointments: updatedDoctor.appointments,
-            userAppointments: updatedUser.appointments,
-        });
-    } catch (error) {
-        console.error("❗ Error:", error);
-        res.status(500).json({ status: "Internal Server Error", error: error.message });
+        res.json({ status: "fixed", date: updated });
+    } catch (e) {
+        console.error("Error:", e);
+        res.status(500).json({ status: "Internal Server Error" });
     }
 });
-
 
 app.get('/allUsers', async (req, res) => {
     const fetch = await User.find();
