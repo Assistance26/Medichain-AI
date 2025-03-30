@@ -30,14 +30,14 @@ import DoctorAppointments from "./pages/DoctorAppointments";
 import UnifiedSignup from './pages/UnifiedSignup.jsx';
 
 function AppContent() {
-  const { user } = useAuth(); // ✅ useAuth is now inside AuthProvider
+  const { user } = useAuth();
 
   return (
     <ChatbotProvider>
       {user?.role === "doctor" ? (
         <DoctorLayout>
           <Routes>
-            <Route path="/dashboard" element={<DoctorDashboard />} />
+            <Route path="/dashboard" element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} /> 
             <Route path="/appointments" element={<DoctorAppointments />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -45,7 +45,7 @@ function AppContent() {
       ) : user?.role === "admin" ? (
         <AdminLayout>
           <Routes>
-            <Route path="/AdminDashboard" element={<AdminDashboard />} />
+            <Route path="/AdminDashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AdminLayout>
@@ -56,20 +56,18 @@ function AppContent() {
             <Route path="/LoginSelection" element={<LoginSelection />} />
             <Route path="/unified-signup" element={<UnifiedSignup />} />
             <Route path="/about" element={<About />} />
-            
             <Route path="/AdminSignup" element={<AdminSignup />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
-            
             <Route path="/DoctorLogin" element={<DoctorLogin />} />
-            
+
             {/* Protected Routes */}
             <Route path="/aidoctor" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
             <Route path="/AdminDashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
             <Route path="/doctors" element={<ProtectedRoute><Doctors /></ProtectedRoute>} />
             <Route path="/DoctorProfile" element={<ProtectedRoute><DoctorProfile /></ProtectedRoute>} />
-            <Route path="/DoctorDashboard" element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} /> 
             <Route path="/appointment" element={<ProtectedRoute><Appointment /></ProtectedRoute>} />
             <Route path="/health-score" element={<ProtectedRoute><HealthScore /></ProtectedRoute>} />
             <Route path="/cost-planning" element={<ProtectedRoute><CostPlanning /></ProtectedRoute>} />
@@ -83,6 +81,7 @@ function AppContent() {
     </ChatbotProvider>
   );
 }
+
 
 function App() {
   return (

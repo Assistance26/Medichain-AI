@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ChatbotContext } from "../context/ChatbotContext";
 import { AuthContext } from "../context/AuthContext";
 import { motion } from "framer-motion";
 
@@ -9,6 +10,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const {doctorState, setDoctorState} = useContext(ChatbotContext);
   const { handleSetUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -21,32 +23,41 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     const { email, password } = formData;
-
+  
     try {
       const res = await axios.get("http://localhost:5000/login", {
         params: { email, password },
       });
-
+  
       if (res.data.status === "User found") {
         console.log("User:", res.data.user);
-
+  
         // Set user role and navigate to home
         handleSetUser({ name: res.data.user.name, email, role: "user" });
+        localStorage.setItem("userState", JSON.stringify({ name: res.data.user.name, email, role: "user" }));
         navigate("/");
       } 
       else if (res.data.status === "Doctor found") {
         console.log("Doctor:", res.data.user);
-
-        // Set doctor role and navigate to dashboard
-        handleSetUser({ name: res.data.user.name, email, role: "doctor" });
-        navigate("/dashboard", { state: { doctor: res.data.user } });
+  
+        // Set doctor role, store in localStorage, and navigate to dashboard
+        const doctorData = { ...res.data.user, role: "doctor" };
+        handleSetUser(doctorData);
+        localStorage.setItem("doctorState", JSON.stringify(doctorData));
+        setDoctorState(doctorData); // Ensure state is updated in context
+  
+        navigate("/dashboard");
       } 
       else if (res.data.status === "Admin found") {
         console.log("Admin:", res.data.user);
-
-        // Set doctor role and navigate to dashboard
-        handleSetUser({ name: res.data.user.name, email, role: "admin" });
-        navigate("/AdminDashboard", { state: { admin: res.data.user } });
+  
+        // Set admin role, store in localStorage, and navigate to Admin Dashboard
+        const adminData = { ...res.data.user, role: "admin" };
+        handleSetUser(adminData);
+        localStorage.setItem("adminState", JSON.stringify(adminData));
+        setDoctorState(adminData);
+  
+        navigate("/AdminDashboard");
       } 
       else {
         console.log("User doesn't exist");
@@ -57,6 +68,7 @@ const Login = () => {
       alert("An error occurred. Please try again.");
     }
   };
+  
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
