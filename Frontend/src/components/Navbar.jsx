@@ -25,7 +25,7 @@ const Navbar = () => {
     setIsOpen(false); // Close menu after logout
   };
 
-  const links = ["Home", "About", "Services", "Doctors", "Appointment", "Contact"];
+  const links = ["Home", "About", "Services", "Doctors", "Appointment", "Contact", "Insurance-Dashboard"];
 
   return (
     <motion.nav

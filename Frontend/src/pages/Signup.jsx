@@ -50,6 +50,8 @@ const Signup = () => {
     });
     if(res.data.status === "User Already Exists")
       alert("User Already Exists");
+    else if(res.data.status === "Use different password")
+      alert("Use different password");
     else{
       alert("User Account Created");
       console.log(res.data.user);
