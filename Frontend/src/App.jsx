@@ -34,8 +34,24 @@ function App() {
 
   return (
     <ChatbotProvider>
-      <MainLayout>
-        <Routes>
+      {user?.role === "doctor" ? (
+        <DoctorLayout>
+          <Routes>
+        <Route path="/dashboard" element={<DoctorDashboard />} />
+        <Route path="/appointments" element={<DoctorAppointments />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+        </DoctorLayout>
+      ) : user?.role === "admin" ? (
+        <AdminLayout>
+          <Routes>
+            <Route path="/AdminDashboard" element={<AdminDashboard />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AdminLayout>
+      ) : (
+        <MainLayout>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/LoginSelection" element={<LoginSelection />} />
           <Route path="/about" element={<About />} />
@@ -45,7 +61,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/DoctorLogin" element={<DoctorLogin />} />
-          <Route path="/AdminDashboard" element={<AdminDashboard />} />
           <Route
             path="/aidoctor"
             element={
@@ -54,7 +69,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-         
+          <Route
+            path="/AdminDashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/services"
             element={
@@ -127,10 +149,10 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </MainLayout>
+        </MainLayout>
+      )}
     </ChatbotProvider>
   );
 }

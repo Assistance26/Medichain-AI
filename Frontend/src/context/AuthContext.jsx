@@ -36,8 +36,8 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 
-// Create Auth Context
-const AuthContext = createContext();
+// ✅ Explicitly export AuthContext
+export const AuthContext = createContext();
 
 // Auth Provider
 export const AuthProvider = ({ children }) => {
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       localStorage.removeItem("user");
     }
-  }, [user]); // 🔹 Runs whenever `user` changes
+  }, [user]);
 
   // Function to set user (login)
   const handleSetUser = (newUser) => {
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, handleSetUser, handleRemoveUser }}>
+    <AuthContext.Provider value={{ user, setUser, handleSetUser, handleRemoveUser }}>
       {children}
     </AuthContext.Provider>
   );
