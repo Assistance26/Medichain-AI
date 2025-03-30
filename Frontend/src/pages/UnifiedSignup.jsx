@@ -36,7 +36,7 @@ const UnifiedSignup = () => {
     e.preventDefault();
     try {
       if (formData.role === "Doctor") {
-        const res = await axios.post('http://localhost:5000/DoctorSignUp', {
+        const res = await axios.post('http://localhost:5000/unified-signup', {
           name: formData.name,
           email: formData.email,
           number: formData.number,
@@ -60,6 +60,7 @@ const UnifiedSignup = () => {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          number: formData.number
         });
 
         if (res.data.status === "User Already Exists") {
