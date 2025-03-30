@@ -156,7 +156,7 @@ app.get('/login', async(req, res) => {
 
 // Unified Signup Route
 app.post('/unified-signup', async (req, res) => {
-    const { name, email, number, password, role, specialization, licenseNumber, experience, publications } = req.body;
+    const { name, email, number, password, specialization, licenseNumber, experience, publications, role } = req.body;
     
     try {
         // Check if user already exists in either collection
@@ -189,25 +189,7 @@ app.post('/unified-signup', async (req, res) => {
             );
 
             return res.json({ status: "Created Successfully", doctor });
-        } else {
-            // Create patient account
-            const user = await User.create({
-                name,
-                email,
-                number,
-                password,
-                role: "Patient"
-            });
-
-            // Send welcome email
-            await sendEmail(
-                email,
-                "Patient Registration Successful",
-                `Dear ${name},\n\nYour account has been created successfully. You can now log in and access your health records.\n\nBest regards,\nMediChain AI Team`
-            );
-
-            return res.json({ status: "User Created", user });
-        }
+        } 
     } catch (error) {
         console.error("Signup Error:", error);
         return res.status(500).json({ error: "Internal Server Error" });

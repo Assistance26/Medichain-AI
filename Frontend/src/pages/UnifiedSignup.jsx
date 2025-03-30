@@ -44,7 +44,8 @@ const UnifiedSignup = () => {
           licenseNumber: formData.licenseNumber,
           experience: formData.experience,
           publications: formData.publications,
-          password: formData.password
+          password: formData.password,
+          role: formData.role
         });
 
         if (res.data.status === "Created Successfully") {
