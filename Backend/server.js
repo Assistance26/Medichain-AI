@@ -8,7 +8,7 @@ const net = require('net');
 const twilio = require("twilio");
 const nodemailer = require("nodemailer");
 const { Doctor, User, Admin } = require("./Connectivity/mongoDB");
-
+const jwt = require('jsonwebtoken')
 // Initialize Express app with WebSocket support
 const app = express();
 expressWs(app);
@@ -127,24 +127,30 @@ app.get('/login', async(req, res) => {
     const {email, password} = req.query;
     console.log(email,password);
     try{
-        const check = await User.findOne({email});
-        const checkDoctor = await Doctor.findOne({email});
-        const checkAdmin = await Admin.findOne({email});
+        const check = await User.findOne({password});
+        const checkDoctor = await Doctor.findOne({password});
+        const checkAdmin = await Admin.findOne({password});
         console.log(check);
         if(check){
-        console.log("User Login");
-        console.log(check);
-        res.json({status:"User found", user: check});
+            const user = {name:check.name, email: check.email, password: check.password}
+            const token = jwt.sign(user, 'iamFJ', {expiresIn:'1h'});
+            console.log("User Login");
+            console.log(check);
+            res.json({status:"User found", user: check, token: token});
         }
         else if(checkDoctor){
+            const user = {name:checkDoctor.name, email: checkDoctor.email, password: checkDoctor.password}
+            const token = jwt.sign(user, 'iamFJ', {expiresIn:'1h'});
             console.log("Doctor Login");
             console.log(checkDoctor);
-        res.json({status:"Doctor found", user: checkDoctor});
+            res.json({status:"Doctor found", user: checkDoctor, token: token});
         }
         else if(checkAdmin){
+            const user = {name:checkAdmin.name, email: checkAdmin.email, password: checkAdmin.password}
+            const token = jwt.sign(user, 'iamFJ', {expiresIn:'1h'});
             console.log("Admin Login");
             console.log(checkAdmin);
-        res.json({status:"Admin found", user: checkAdmin});
+            res.json({status:"Admin found", user: checkAdmin, token: token});
         }
         else
         res.json({status:"Does not exists"});
@@ -298,6 +304,27 @@ app.post('/adminSignup', async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 })
+function Authentication(req, res, next){
+    const authHeader = req.headers['authorization'];
+    if(!authHeader){
+        res.status(500).json({error:"Internal Error"});
+    }
+    const token = authHeader.split(' ')[1];
+    if(!token)
+        return res.status(401).json({ message: "Token is missing from Authorization header" });
+    jwt.verify(token, 'iamFJ', (err, user) => {
+        if(err)
+            return res.status(505).json({error:"Not Found"});
+        req.user = user;
+        req.token = token;
+        next();
+    })
+}
+
+app.get('/authenticate',Authentication, async (req,res) => {
+   if(req.user)
+    res.json({status:"User Authenticated", user:req.user});
+})
 
 app.get('/pendingDoctors', async (req, res) => {
     try {
@@ -362,53 +389,124 @@ catch(e){
 }
 })
 
+// app.post('/appointment', async (req, res) => {
+//     const { Docname, PatientName, timeSlot, appointmentAt } = req.body;
+//     console.log(Docname, ":", appointmentAt, ",", timeSlot, "with:", PatientName);
+
+//     try {
+//         const fix = await Doctor.findOne({ name: Docname });
+
+//         if (!fix) {
+//             console.log("Doctor not found:", Docname);
+//             return res.json({ status: "Doctor not found" });
+//         }
+
+//         const updated = await Doctor.findOneAndUpdate(
+//             { name: Docname },
+//             {
+//                 $push: {
+//                     appointmentWith: PatientName,  // ✅ Fixed push syntax
+//                     appointmentAt: appointmentAt,
+//                     timeSlot: timeSlot
+//                 }
+//             },
+//             { new: true }
+//         );
+
+//         const userUpdate = await User.findOneAndUpdate(
+//             { name: PatientName },
+//             {
+//                 $push: {
+//                     appointmentAt: appointmentAt,
+//                     timeSlot: timeSlot,
+//                     appointmentWith: Docname
+//                 }
+//             },
+//             { new: true }
+//         );
+
+//         if (!userUpdate) {
+//             console.log("User not found:", PatientName);
+//             return res.json({ status: "User not found" });
+//         }
+
+//         res.json({ status: "fixed", date: updated });
+//     } catch (e) {
+//         console.error("Error:", e);
+//         res.status(500).json({ status: "Internal Server Error" });
+//     }
+// });
+
 app.post('/appointment', async (req, res) => {
     const { Docname, PatientName, timeSlot, appointmentAt } = req.body;
-    console.log(Docname, ":", appointmentAt, ",", timeSlot, "with:", PatientName);
+    console.log(`${Docname}: ${appointmentAt}, ${timeSlot} with: ${PatientName}`);
 
     try {
-        const fix = await Doctor.findOne({ name: Docname });
+        // ✅ Check if Doctor exists
+        const doctor = await Doctor.findOne({ name: Docname });
 
-        if (!fix) {
-            console.log("Doctor not found:", Docname);
-            return res.json({ status: "Doctor not found" });
+        if (!doctor) {
+            console.log("❌ Doctor not found:", Docname);
+            return res.status(404).json({ status: "Doctor not found" });
         }
 
-        const updated = await Doctor.findOneAndUpdate(
+        // ✅ Push to Doctor's Appointments
+        const updatedDoctor = await Doctor.findOneAndUpdate(
             { name: Docname },
             {
                 $push: {
-                    appointmentWith: PatientName,  // ✅ Fixed push syntax
-                    appointmentAt: appointmentAt,
-                    timeSlot: timeSlot
-                }
+                    appointments: {
+                        patientName: PatientName,
+                        appointmentAt: appointmentAt,
+                        timeSlot: timeSlot,
+                    },
+                },
             },
             { new: true }
         );
 
-        const userUpdate = await User.findOneAndUpdate(
-            { name: PatientName },
-            {
-                $set: {
-                    appointmentAt: appointmentAt,
-                    timeSlot: timeSlot,
-                    appointmentWith: Docname
-                }
-            },
-            { new: true }
-        );
+        // ✅ Check if User exists
+        const user = await User.findOne({ name: PatientName });
 
-        if (!userUpdate) {
-            console.log("User not found:", PatientName);
-            return res.json({ status: "User not found" });
+        if (!user) {
+            console.log("❌ User not found:", PatientName);
+            return res.status(404).json({ status: "User not found" });
         }
 
-        res.json({ status: "fixed", date: updated });
-    } catch (e) {
-        console.error("Error:", e);
-        res.status(500).json({ status: "Internal Server Error" });
+        // ✅ Push to User's Appointments
+        const updatedUser = await User.findOneAndUpdate(
+            { name: PatientName },
+            {
+                $push: {
+                    appointments: {
+                        doctorName: Docname,
+                        appointmentAt: appointmentAt,
+                        timeSlot: timeSlot,
+                    },
+                },
+            },
+            { new: true }
+        );
+
+        // ✅ Check if update is successful
+        if (!updatedDoctor || !updatedUser) {
+            console.log("❌ Failed to update appointment.");
+            return res.status(500).json({ status: "Failed to update appointment" });
+        }
+
+        // ✅ Success Response
+        res.json({
+            status: "fixed",
+            message: "Appointment booked successfully!",
+            doctorAppointments: updatedDoctor.appointments,
+            userAppointments: updatedUser.appointments,
+        });
+    } catch (error) {
+        console.error("❗ Error:", error);
+        res.status(500).json({ status: "Internal Server Error", error: error.message });
     }
 });
+
 
 app.get('/allUsers', async (req, res) => {
     const fetch = await User.find();
@@ -455,6 +553,17 @@ app.get('/fetchDates', async (req, res) => {
     }
 });
 
+app.get('/fetchDoctors', async (req, res) => {
+    try{
+     const doctors = await Doctor.find();
+     if(doctors)
+        console.log(doctors);
+        res.json({status:"Fetched", doctors: doctors});
+    }
+    catch(e){
+        res.status(500).json({status:"Internal Server Error"});
+    }
+})
 
 app.get('/UserWithAppointment', async (req, res) => {
     const {email} = req.query;

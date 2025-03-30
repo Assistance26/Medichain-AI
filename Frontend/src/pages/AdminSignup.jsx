@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 
 const AdminSignup = () => {
   const [formData, setFormData] = useState({
@@ -29,16 +29,13 @@ const AdminSignup = () => {
 
       if (res.data.status === "User Already Exists") {
         alert("Admin Already Exists");
-      } 
-      else if(res.data.status === "Use different password")
-        alert("Use different password");
-      else {
+      } else {
         alert("Admin Account Created");
         console.log(res.data.admin);
         navigate("/login");
       }
-    } catch (e) {
-      console.error("Signup Error:", e);
+    } catch (error) {
+      console.error("Signup Error:", error);
       alert("An error occurred. Please try again.");
     }
   };
@@ -78,13 +75,13 @@ const AdminSignup = () => {
           required
         />
 
-        <button type="submit" className="bg-primary text-white w-full p-2 rounded-md">
+        <button type="submit" className="bg-blue-500 text-white w-full p-2 rounded-md">
           Sign Up
         </button>
 
         <p className="text-center mt-3 text-sm">
-          Already have an account? {" "}
-          <a href="/login" className="text-primary underline">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-500 underline">
             Login
           </a>
         </p>

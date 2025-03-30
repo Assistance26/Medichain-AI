@@ -7,7 +7,7 @@ import { AiOutlineRobot } from "react-icons/ai";
 import { MdHealthAndSafety, MdOutlineMedicalServices } from "react-icons/md";
 import { FaMoneyCheckAlt } from "react-icons/fa";
 // import { useAuth } from "../contexts/AuthContext";
-import { useUser } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
@@ -29,7 +29,7 @@ const faqs = [
 const Home = () => {
   const [openIndex, setOpenIndex] = useState(null);
   const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
-  const { user } = useUser();
+  const { user } = useAuth();
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-blue-50 to-blue-200">

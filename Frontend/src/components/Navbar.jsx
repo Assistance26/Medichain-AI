@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react"; // Icon for hamburger menu
 // import { useAuth } from "../contexts/AuthContext";
-import { useUser } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
   // const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isOpen, setIsOpen] = useState(false); // State for mobile menu
   // const { authUser,setAuthUser } = useAuth();
-  const { user, handleRemoveUser} = useUser();
+  const { user, handleRemoveUser} = useAuth();
 
 
   // useEffect(() => {
@@ -25,7 +25,7 @@ const Navbar = () => {
     setIsOpen(false); // Close menu after logout
   };
 
-  const links = ["Home", "About", "Services", "Doctors", "Appointment", "Contact", "Insurance-Dashboard"];
+  const links = ["Home", "About", "Services", "Doctors", "Appointment", "Contact"];
 
   return (
     <motion.nav

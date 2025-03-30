@@ -4,6 +4,7 @@ export const ChatbotContext = createContext(null);
 
 export default function ChatbotProvider({ children }){
     const [chatHistory, setChatHistory] = useState([]);
+    const [doctorAppointments, setDoctorAppointments] = useState();
     const [user, setUser] = useState();
 
     const addChatMessage = (message, sender) => {
@@ -11,7 +12,7 @@ export default function ChatbotProvider({ children }){
     };
 
     return (
-        <ChatbotContext.Provider value={{ chatHistory, addChatMessage, user, setUser }}>
+        <ChatbotContext.Provider value={{ chatHistory, addChatMessage, user, setUser, doctorAppointments, setDoctorAppointments }}>
             {children}
         </ChatbotContext.Provider>
     );
