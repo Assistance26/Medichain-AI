@@ -8,7 +8,7 @@ const net = require('net');
 const twilio = require("twilio");
 const nodemailer = require("nodemailer");
 const { Doctor, User, Admin } = require("./Connectivity/mongoDB");
-const jwt = require('jsonwebtoken')
+
 // Initialize Express app with WebSocket support
 const app = express();
 expressWs(app);
@@ -127,30 +127,24 @@ app.get('/login', async(req, res) => {
     const {email, password} = req.query;
     console.log(email,password);
     try{
-        const check = await User.findOne({password});
-        const checkDoctor = await Doctor.findOne({password});
-        const checkAdmin = await Admin.findOne({password});
+        const check = await User.findOne({email});
+        const checkDoctor = await Doctor.findOne({email});
+        const checkAdmin = await Admin.findOne({email});
         console.log(check);
         if(check){
-            const user = {name:check.name, email: check.email, password: check.password}
-            const token = jwt.sign(user, 'iamFJ', {expiresIn:'1h'});
-            console.log("User Login");
-            console.log(check);
-            res.json({status:"User found", user: check, token: token});
+        console.log("User Login");
+        console.log(check);
+        res.json({status:"User found", user: check});
         }
         else if(checkDoctor){
-            const user = {name:checkDoctor.name, email: checkDoctor.email, password: checkDoctor.password}
-            const token = jwt.sign(user, 'iamFJ', {expiresIn:'1h'});
             console.log("Doctor Login");
             console.log(checkDoctor);
-            res.json({status:"Doctor found", user: checkDoctor, token: token});
+        res.json({status:"Doctor found", user: checkDoctor});
         }
         else if(checkAdmin){
-            const user = {name:checkAdmin.name, email: checkAdmin.email, password: checkAdmin.password}
-            const token = jwt.sign(user, 'iamFJ', {expiresIn:'1h'});
             console.log("Admin Login");
             console.log(checkAdmin);
-            res.json({status:"Admin found", user: checkAdmin, token: token});
+        res.json({status:"Admin found", user: checkAdmin});
         }
         else
         res.json({status:"Does not exists"});
@@ -303,27 +297,6 @@ app.post('/adminSignup', async (req, res) => {
         console.error("Signup Error:", error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
-})
-function Authentication(req, res, next){
-    const authHeader = req.headers['authorization'];
-    if(!authHeader){
-        res.status(500).json({error:"Internal Error"});
-    }
-    const token = authHeader.split(' ')[1];
-    if(!token)
-        return res.status(401).json({ message: "Token is missing from Authorization header" });
-    jwt.verify(token, 'iamFJ', (err, user) => {
-        if(err)
-            return res.status(505).json({error:"Not Found"});
-        req.user = user;
-        req.token = token;
-        next();
-    })
-}
-
-app.get('/authenticate',Authentication, async (req,res) => {
-   if(req.user)
-    res.json({status:"User Authenticated", user:req.user});
 })
 
 app.get('/pendingDoctors', async (req, res) => {

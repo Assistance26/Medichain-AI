@@ -45,19 +45,14 @@ const AdminDashboard = () => {
         setPendingDoctors((prev) => prev.filter((doctor) => doctor._id !== doctorId));
       }
     } catch (e) {
-      console.error(`Error updating doctor status:`, e);
+      console.error("Error updating doctor status:", e);
     }
   };
 
   const handleRemove = async (userId) => {
-    console.log(userId);
     try {
-      const res = await axios.post("http://localhost:5000/removeUser",{
-        userId
-      });
-
+      const res = await axios.post("http://localhost:5000/removeUser", { userId });
       if (res.data.status === "User Removed") {
-        console.log(res.data.delete);
         setAllUsers((prev) => prev.filter((user) => user._id !== userId));
       }
     } catch (e) {

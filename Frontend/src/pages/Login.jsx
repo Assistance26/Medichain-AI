@@ -123,10 +123,11 @@
 // export default Login;
 
 
-import { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext"; // ✅ Correct Import
+import { ChatbotContext } from "../context/ChatbotContext";
+import { AuthContext } from "../context/AuthContext";
 import { motion } from "framer-motion";
 
 const Login = () => {
@@ -134,9 +135,8 @@ const Login = () => {
     email: "",
     password: "",
   });
-
-  // ✅ Use useAuth instead of useUser
-  const { handleSetUser } = useAuth(); 
+  const { doctorState, setDoctorState } = useContext(ChatbotContext);
+  const { handleSetUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Handle Input Changes
@@ -156,26 +156,41 @@ const Login = () => {
 
       if (res.data.status === "User found") {
         console.log("User:", res.data.user);
-        handleSetUser(res.data.user);
+
+        // Set user role and navigate to home
+        handleSetUser({ name: res.data.user.name, email, role: "user" });
+        localStorage.setItem(
+          "userState",
+          JSON.stringify({ name: res.data.user.name, email, role: "user" })
+        );
         navigate("/");
       } else if (res.data.status === "Doctor found") {
         console.log("Doctor:", res.data.user);
 
-        // Set doctor role and navigate to doctor dashboard
-        handleSetUser({ name: res.data.user.name, email, role: "doctor" });
-        navigate("/dashboard", { state: { doctor: res.data.user } });
+        // Set doctor role, store in localStorage, and navigate to dashboard
+        const doctorData = { ...res.data.user, role: "doctor" };
+        handleSetUser(doctorData);
+        localStorage.setItem("doctorState", JSON.stringify(doctorData));
+        setDoctorState(doctorData); // Ensure state is updated in context
+
+        navigate("/dashboard");
       } else if (res.data.status === "Admin found") {
         console.log("Admin:", res.data.user);
 
-        // Set admin role and navigate to admin dashboard
-        handleSetUser({ name: res.data.user.name, email, role: "admin" });
-        navigate("/AdminDashboard", { state: { admin: res.data.user } });
+        // Set admin role, store in localStorage, and navigate to Admin Dashboard
+        const adminData = { ...res.data.user, role: "admin" };
+        handleSetUser(adminData);
+        localStorage.setItem("adminState", JSON.stringify(adminData));
+        setDoctorState(adminData);
+
+        navigate("/AdminDashboard");
       } else {
         console.log("User doesn't exist");
         alert("Email or password incorrect");
       }
     } catch (e) {
-      console.log("Error:", e);
+      console.error("Login error:", e);
+      alert("An error occurred. Please try again.");
     }
   };
 
@@ -232,7 +247,10 @@ const Login = () => {
         {/* Signup Redirect */}
         <p className="text-center text-sm text-gray-600 mt-4">
           Don't have an account?{" "}
-          <a href="/LoginSelection" className="text-primary underline">
+          <a
+            href="/signup"
+            className="text-blue-500 hover:underline transition-all duration-300"
+          >
             Sign Up
           </a>
         </p>

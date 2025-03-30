@@ -11,9 +11,11 @@ const DoctorNavbar = () => {
 
   const handleLogout = () => {
     handleRemoveUser();
+    localStorage.removeItem("user"); // ✅ Ensure user is removed
     navigate("/LoginSelection");
     setIsOpen(false); // Close menu after logout
   };
+  
 
   return (
     <nav className="bg-blue-700 text-white p-4 flex justify-between items-center relative z-50">
@@ -58,52 +60,6 @@ const DoctorNavbar = () => {
           </Link>
         )}
       </div>
-
-      {/* Mobile Navigation with Framer Motion */}
-      <AnimatePresence>
-  {isOpen && (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="fixed top-16 left-0 w-full bg-white/10 backdrop-blur-2xl shadow-lg border-t border-white/20 py-6 z-40"
-    >
-      <div className="flex flex-col items-center space-y-6">
-        <Link
-          to="/dashboard"
-          className="text-lg font-medium hover:text-blue-500 transition-all duration-200 text-black hover:scale-105"
-          onClick={() => setIsOpen(false)}
-        >
-          Dashboard
-        </Link>
-        <Link
-          to="/appointments"
-          className="text-lg font-medium hover:text-blue-500 transition-all duration-200 text-black hover:scale-105"
-          onClick={() => setIsOpen(false)}
-        >
-          Upcoming Appointments
-        </Link>
-        {user ? (
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 px-6 py-2 rounded transition-all duration-300 transform hover:scale-105 hover:bg-red-600 text-white"
-          >
-            Logout
-          </button>
-        ) : (
-          <Link
-            to="/signup"
-            className="bg-green-500 px-6 py-2 rounded transition-all duration-300 transform hover:scale-105 hover:bg-green-600 text-white"
-            onClick={() => setIsOpen(false)}
-          >
-            Signup
-          </Link>
-        )}
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
     </nav>
   );
 };

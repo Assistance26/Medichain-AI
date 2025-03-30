@@ -1,8 +1,9 @@
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // ✅ Correct Import
+import { Navigate, useLocation } from 'react-router-dom';
+import {useContext} from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth(); // ✅ Correct Hook
+  const { user } = useContext(AuthContext);
   const location = useLocation();
 
   if (!user) {

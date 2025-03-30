@@ -1,8 +1,9 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { ChatbotContext } from "../context/ChatbotContext"; // ✅ Chatbot Context
-import { useAuth } from "../context/AuthContext"; // ✅ Corrected Import
+import axios from 'axios';
+import {ChatbotContext} from '../context/ChatbotContext';
+// import { useAuth } from "../contexts/AuthContext";
+import { AuthContext } from "../context/AuthContext";
 
 const DoctorLogin = () => {
   const { user, setUser } = useContext(ChatbotContext);
@@ -10,9 +11,11 @@ const DoctorLogin = () => {
   const [password, setPassword] = useState("");
   const [doctor, setDoctor] = useState(null);
   const navigate = useNavigate();
-
-  // ✅ Use useAuth instead of useUser
-  const { handleSetUser } = useAuth(); 
+    const { handleSetUser } = useContext(AuthContext);
+  
+//   const handleChange = (e) => {
+//     setFormData({ ...formData, [e.target.name]: e.target.value });
+//   };
 
   // Handle Form Submission
   const handleSubmit = async (e) => {
