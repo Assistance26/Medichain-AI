@@ -19,8 +19,8 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 //import Signup from "./pages/Signup"; // ✅ Ensure this file exists
 import HealthScore from "./pages/HealthScore";
-import CostPlanning from "./pages/CostPlanning.jsx";
-import SymptomChecker from "./pages/SymptomChecker.jsx";
+import CostPlanning from "./pages/CostPlanning";
+import SymptomChecker from "./pages/SymptomChecker";
 import NotFound from "./pages/NotFound";
 import Chatbot from "./components/Chatbot";
 import DoctorLogin from "./pages/DoctorLogin.jsx";
@@ -52,6 +52,7 @@ function AppContent() {
       ) : (
         <MainLayout>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/LoginSelection" element={<LoginSelection />} />
             <Route path="/unified-signup" element={<UnifiedSignup />} />

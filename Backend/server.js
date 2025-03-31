@@ -74,54 +74,113 @@ app.post("/send-email", async (req, res) => {
     }
 });
 
-// Video Call Token Generation
+// // Video Call Token Generation
+// app.post('/api/token', async (req, res) => {
+//     console.log("Received token request:", req.body);
+    
+//     const { appointmentId, userType, userName } = req.body;
+    
+//     // Validate required parameters
+//     if (!appointmentId || !userType || !userName) {
+//         console.error("Missing required parameters:", { appointmentId, userType, userName });
+//         return res.status(400).json({ 
+//             error: 'Missing required parameters',
+//             required: ['appointmentId', 'userType', 'userName']
+//         });
+//     }
+    
+//     try {
+//         // Generate a unique room name based on appointment ID
+//         const roomName = `appointment_1`;
+        
+//         // Generate identity based on user type
+//         const identity = userType === 'doctor' ? `Dr_${userName}` : userName;
+        
+//         console.log("Generating token for:", { roomName, identity });
+        
+//         // Create a new AccessToken instance
+//         const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity });
+        
+//         // Add a Video grant to the token
+//         token.addGrant(new VideoGrant({ room: roomName }));
+        
+//         // Generate the JWT token
+//         const jwtToken = token.toJwt();
+        
+//         res.json({ 
+//             success: true,
+//             token: jwtToken, 
+//             roomName, 
+//             identity 
+//         });
+//     } catch (error) {
+//         console.error('Error generating token:', error);
+//         res.status(500).json({ 
+//             success: false,
+//             error: 'Failed to generate token',
+//             details: error.message 
+//         });
+//     }
+// });
+
 app.post('/api/token', async (req, res) => {
-    console.log("Received token request:", req.body);
-    
+    console.log("🔍 Received token request:", req.body);
+
     const { appointmentId, userType, userName } = req.body;
-    
-    // Validate required parameters
+
+    // ✅ Validate required parameters
     if (!appointmentId || !userType || !userName) {
-        console.error("Missing required parameters:", { appointmentId, userType, userName });
-        return res.status(400).json({ 
+        console.error("❌ Missing parameters:", { appointmentId, userType, userName });
+        return res.status(400).json({
             error: 'Missing required parameters',
             required: ['appointmentId', 'userType', 'userName']
         });
     }
-    
+
     try {
-        // Generate a unique room name based on appointment ID
+        // ✅ Fixed roomName (should use dynamic appointment ID)
         const roomName = `appointment_1`;
-        
-        // Generate identity based on user type
+
+        // ✅ Generate identity correctly
         const identity = userType === 'doctor' ? `Dr_${userName}` : userName;
-        
-        console.log("Generating token for:", { roomName, identity });
-        
-        // Create a new AccessToken instance
-        const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity });
-        
-        // Add a Video grant to the token
+
+        console.log("🔐 Generating token for:", { roomName, identity });
+
+        // ✅ Create a new AccessToken instance
+        const token = new AccessToken(
+            twilioAccountSid,
+            twilioApiKey,
+            twilioApiSecret,
+            { identity }
+        );
+
+        // ✅ Add Video grant to the token
         token.addGrant(new VideoGrant({ room: roomName }));
-        
-        // Generate the JWT token
+
+        // ✅ Token TTL (1 hour)
+        token.ttl = 3600;
+
+        // ✅ Generate JWT Token
         const jwtToken = token.toJwt();
-        
-        res.json({ 
+
+        console.log("✅ Token generated successfully:", jwtToken);
+
+        res.json({
             success: true,
-            token: jwtToken, 
-            roomName, 
-            identity 
+            token: jwtToken,
+            roomName,
+            identity
         });
     } catch (error) {
-        console.error('Error generating token:', error);
-        res.status(500).json({ 
+        console.error("❌ Error generating token:", error.message);
+        res.status(500).json({
             success: false,
-            error: 'Failed to generate token',
-            details: error.message 
+            error: "Failed to generate token",
+            details: error.message
         });
     }
 });
+
 
 app.get('/login', async(req, res) => {
     const {email, password} = req.query;

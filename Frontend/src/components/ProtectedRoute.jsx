@@ -11,10 +11,11 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/LoginSelection" state={{ from: location.pathname }} />;
   }
 
-//   if (allowedRoles && !allowedRoles.includes(user.role)) {
-//     // Redirect unauthorized users to home
-//     return <Navigate to="/" />;
-//   }2
+  // Uncomment to restrict based on allowed roles (if needed)
+  // if (allowedRoles && !allowedRoles.includes(user.role)) {
+  //   // Redirect unauthorized users to home
+  //   return <Navigate to="/" />;
+  // }
 
   return children;
 };
