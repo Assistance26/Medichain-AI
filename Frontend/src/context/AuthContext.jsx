@@ -1,30 +1,33 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from "react";
 
-// Create a context for the user
-const UserContext = createContext();
+export const AuthContext = createContext();
 
-// Create a provider component
-export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("user")) || null);
 
-  // Function to set the user
-  const handleSetUser = (newUser) => {
-    setUser(newUser);
-  };
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
 
-  // Function to remove the user (log out)
-  const handleRemoveUser = () => {
-    setUser(null);
-  };
+  const handleSetUser = (newUser) => setUser(newUser);
+  const handleRemoveUser = () => setUser(null);
 
   return (
-    <UserContext.Provider value={{ user, handleSetUser, handleRemoveUser }}>
+    <AuthContext.Provider value={{ user, setUser, handleSetUser, handleRemoveUser }}>
       {children}
-    </UserContext.Provider>
+    </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the UserContext
-export const useUser = () => {
-  return useContext(UserContext);
+// ✅ Corrected: Use a custom hook to avoid direct `useContext(AuthContext)`
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };

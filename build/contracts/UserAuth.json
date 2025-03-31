@@ -9565,12 +9565,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x2EF707Ab36432F71ADd9cBcc25699cE2D0bD4a2f",
-      "transactionHash": "0xa1a2ec5bfdb2999db4b4c61c26e33b7bc4fce9fd43d40b142f80a01e04469a75"
+      "address": "0x45fc65896d0272CEb810429330d78981F860A5Bd",
+      "transactionHash": "0x90bbd4c8960b68214095f944b203b2efb223acf3fd68664efd679954f9f30701"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2025-03-16T18:03:49.636Z",
+  "updatedAt": "2025-03-21T23:42:19.654Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

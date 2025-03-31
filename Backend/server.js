@@ -31,8 +31,10 @@ app.use((req, res, next) => {
 // Import Routes
 const chatbotRoutes = require("./routes/chatbotRoutes");
 const sentimentRoutes = require("./routes/sentimentRoutes");
+const videoRoutes = require("./routes/videoRoutes");
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/sentiment", sentimentRoutes);
+app.use("/api/video", videoRoutes);
 
 // Twilio Credentials
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -72,20 +74,54 @@ app.post("/send-email", async (req, res) => {
     }
 });
 
-// Twilio Token Route
-app.post("/api/token", (req, res) => {
-    const { identity, room } = req.body;
-    if (!identity || !room) return res.status(400).json({ error: "Identity and Room Name are required!" });
+// Video Call Token Generation
+app.post('/api/token', async (req, res) => {
+    console.log("Received token request:", req.body);
+    
+    const { appointmentId, userType, userName } = req.body;
+    
+    // Validate required parameters
+    if (!appointmentId || !userType || !userName) {
+        console.error("Missing required parameters:", { appointmentId, userType, userName });
+        return res.status(400).json({ 
+            error: 'Missing required parameters',
+            required: ['appointmentId', 'userType', 'userName']
+        });
+    }
+    
     try {
-        // const uniqueIdentity = `${identity}-${roomName}`;
-        const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity});
-        token.addGrant(new VideoGrant({ room }));
-        res.json({ token: token.toJwt() });
+        // Generate a unique room name based on appointment ID
+        const roomName = `appointment_1`;
+        
+        // Generate identity based on user type
+        const identity = userType === 'doctor' ? `Dr_${userName}` : userName;
+        
+        console.log("Generating token for:", { roomName, identity });
+        
+        // Create a new AccessToken instance
+        const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity });
+        
+        // Add a Video grant to the token
+        token.addGrant(new VideoGrant({ room: roomName }));
+        
+        // Generate the JWT token
+        const jwtToken = token.toJwt();
+        
+        res.json({ 
+            success: true,
+            token: jwtToken, 
+            roomName, 
+            identity 
+        });
     } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error('Error generating token:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to generate token',
+            details: error.message 
+        });
     }
 });
-
 
 app.get('/login', async(req, res) => {
     const {email, password} = req.query;
@@ -118,31 +154,111 @@ app.get('/login', async(req, res) => {
     }
 });
 
-// User Signup with Email Notification
-
-app.post('/signup', async (req, res) => {
-    const { name, email, password } = req.body;
+// Unified Signup Route
+app.post('/unified-signup', async (req, res) => {
+    const { name, email, number, password, specialization, licenseNumber, experience, publications, role } = req.body;
+    
     try {
-        const connection = await User.findOne({email});
-        if(connection)
-            res.json({status:"User Already Exists"});
-        else{
-            const user = await User.create({name: name, email: email, password: password});
-            res.json({status:"User Created", user:user});
+        // Check if user already exists in either collection
+        const existingUser = await User.findOne({ email });
+        const existingDoctor = await Doctor.findOne({ email });
+        
+        if (existingUser || existingDoctor) {
+            return res.json({ status: "User Already Exists" });
         }
+
+        if (role === "Doctor") {
+            // Create doctor account
+            const doctor = await Doctor.create({
+                name,
+                email,
+                number,
+                password,
+                specialization,
+                licenseNumber,
+                Experience: experience,
+                publications,
+                approval: "pending"
+            });
+
+            // Send welcome email
+            await sendEmail(
+                email,
+                "Doctor Registration Successful",
+                `Dear Dr. ${name},\n\nYour account has been created successfully and is pending approval. We will notify you once your account is approved.\n\nBest regards,\nMediChain AI Team`
+            );
+
+            return res.json({ status: "Created Successfully", doctor });
+        } 
     } catch (error) {
         console.error("Signup Error:", error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
-app.post("/DoctorSignIn", async (req, res) => {
-    const { email, name, number, specialization, licenseNumber, experience, publications, password } = req.body;
+// Update existing signup route to handle only patient registration
+app.post('/signup', async (req, res) => {
+    const { name, email, number, password } = req.body;
     try {
-        if (await Doctor.findOne({ email })) 
+        const existingUser = await User.findOne({ email });
+        const existingDoctor = await Doctor.findOne({ email });
+        
+        if (existingUser || existingDoctor) {
+            return res.json({ status: "User Already Exists" });
+        }
+
+        const user = await User.create({
+            name,
+            email,
+            number,
+            password,
+            role: "Patient"
+        });
+
+        // Send welcome email
+        await sendEmail(
+            email,
+            "Patient Registration Successful",
+            `Dear ${name},\n\nYour account has been created successfully. You can now log in and access your health records.\n\nBest regards,\nMediChain AI Team`
+        );
+
+        res.json({ status: "User Created", user });
+    } catch (error) {
+        console.error("Signup Error:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// Update DoctorSignIn route to handle only doctor registration
+app.post("/DoctorSignIn", async (req, res) => {
+    const { name, email, number, specialization, licenseNumber, experience, publications, password } = req.body;
+    try {
+        const existingUser = await User.findOne({ email });
+        const existingDoctor = await Doctor.findOne({ email });
+        
+        if (existingUser || existingDoctor) {
             return res.json({ status: "Account Already Exists" });
-        const doctor = await Doctor.create({ name, email, number, specialization, licenseNumber, Experience: experience, publications, password, approval: "pending" });
-        sendEmail(email, "Doctor Registration Successful", `Dear Dr. ${name}, your account has been created successfully.`);
+        }
+
+        const doctor = await Doctor.create({
+            name,
+            email,
+            number,
+            specialization,
+            licenseNumber,
+            Experience: experience,
+            publications,
+            password,
+            approval: "pending"
+        });
+
+        // Send welcome email
+        await sendEmail(
+            email,
+            "Doctor Registration Successful",
+            `Dear Dr. ${name},\n\nYour account has been created successfully and is pending approval. We will notify you once your account is approved.\n\nBest regards,\nMediChain AI Team`
+        );
+
         res.json({ status: "Created Successfully", doctor });
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
@@ -255,7 +371,7 @@ app.post('/appointment', async (req, res) => {
         const userUpdate = await User.findOneAndUpdate(
             { name: PatientName },
             {
-                $set: {
+                $push: {
                     appointmentAt: appointmentAt,
                     timeSlot: timeSlot,
                     appointmentWith: Docname
@@ -276,7 +392,29 @@ app.post('/appointment', async (req, res) => {
     }
 });
 
+app.get('/allUsers', async (req, res) => {
+    const fetch = await User.find();
+    try{
+    if(fetch)
+        res.json({status:"Fetched Successfully", users: fetch});
+}
+catch(e){
+    res.status(500).json({ status:"Internal Server Error"});
+}
+})
 
+app.post('/removeUser', async (req, res) => {
+    const {userId} = req.body;
+    console.log(userId);
+    try{
+        const del = await User.findByIdAndDelete(userId);
+        if(del)
+            res.json({status:'User Removed',delete: del});
+    }
+    catch(e){
+        res.status(500).json({status:"Internal Server Error"});
+    }
+})
 
 app.get('/fetchDates', async (req, res) => {
     const {name} = req.query;
@@ -299,6 +437,17 @@ app.get('/fetchDates', async (req, res) => {
     }
 });
 
+app.get('/fetchDoctors', async (req, res) => {
+    try{
+     const doctors = await Doctor.find();
+     if(doctors)
+        console.log(doctors);
+        res.json({status:"Fetched", doctors: doctors});
+    }
+    catch(e){
+        res.status(500).json({status:"Internal Server Error"});
+    }
+})
 
 app.get('/UserWithAppointment', async (req, res) => {
     const {email} = req.query;

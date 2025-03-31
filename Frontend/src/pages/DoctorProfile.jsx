@@ -1,8 +1,15 @@
 import { useLocation } from "react-router-dom";
-import { useState } from "react";
+  import { useState,useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useUser } from "../context/AuthContext";
-import axios from "axios";
+import {ChatbotContext} from '../context/ChatbotContext';
+import axios from 'axios';
+// import { useAuth } from "../contexts/AuthContext";
+import { AuthContext } from "../context/AuthContext";
+
+const bookedAppointments = {
+  "2025-03-16": ["10:00 AM", "4:00 PM"],
+  "2025-03-11": ["11:30 AM"],
+};
 
 // Generate the next 7 days dynamically
 const getNextSevenDays = () => {
@@ -24,7 +31,9 @@ const getNextSevenDays = () => {
 const timeSlots = ["10:00 AM", "11:30 AM", "2:00 PM", "4:00 PM", "6:00 PM"];
 
 const DoctorProfile = () => {
-  const { user } = useUser();
+  // const {user,setUser} = useContext(ChatbotContext);
+  const {user} = useContext(AuthContext);
+  // const {authUser} = useAuth();
   const location = useLocation();
   const doctor = location.state || {};
 

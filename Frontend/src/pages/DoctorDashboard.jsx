@@ -1,68 +1,72 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
+import { ChatbotContext } from "../context/ChatbotContext";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaVideo } from "react-icons/fa"; // For video call button icon
 import VideoCall from "../components/VideoCall"; // Import the VideoCall component
 
 const DoctorDashboard = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-
-  // Get doctor data from location state
-  const doctor = location.state?.doctor;
-
-  // Redirect if doctor data is missing
-  useEffect(() => {
-    if (!doctor) {
-      navigate("/login");
-    }
-  }, [doctor, navigate]);
+  const { doctorAppointments, setDoctorAppointments, doctorState, setDoctorState } = useContext(ChatbotContext);
 
   const [appointments, setAppointments] = useState([]);
-  const [patients, setPatients] = useState([]);
-  const [isVideoCallActive, setIsVideoCallActive] = useState(false); // State for handling video call
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
   const [roomName, setRoomName] = useState("");
   const [identity, setIdentity] = useState("");
 
-  // Fetch appointments when the component mounts
+  // Ensure doctorState persists
+  useEffect(() => {
+    const storedDoctor = localStorage.getItem("doctorState");
+
+    if (!doctorState && storedDoctor) {
+      setDoctorState(JSON.parse(storedDoctor));
+    }
+
+    if (!doctorState && !storedDoctor) {
+      navigate("/login"); // Redirect if no doctor data is found
+    }
+  }, [doctorState, navigate, setDoctorState]);
+
+  // Fetch Appointments
   useEffect(() => {
     const fetchAppointments = async () => {
+      if (!doctorState?.name) return;
+
       try {
         const res = await axios.get("http://localhost:5000/fetchDates", {
-          params: { name: doctor.name },
+          params: { name: doctorState.name },
         });
-   
-        if (res.data.status === "fetched") {
-          console.log("Fetched Appointments:", res.data);
-  
-          // Structuring the fetched data properly
-          const fetchedAppointments = res.data.dates.appointmentAt.map((date, index) => ({
-            appointmentAt: date,
-            appointmentWith: res.data.dates.appointmentWith[index] || "Unknown",
-            timeSlot: res.data.dates.timeSlot[index] || "Time not specified",
-          }));
-  
-          setAppointments(fetchedAppointments);
+
+        if (res.data.status === "fetched" && res.data.dates) {
+          console.log("Fetched Appointments:", res.data.dates);
+
+          setDoctorAppointments({
+            appointmentWith: res.data.dates.appointmentWith,
+            appointmentAt: res.data.dates.appointmentAt,
+            timeSlot: res.data.dates.timeSlot,
+          });
         } else {
-          console.log("Issue: Unexpected response status");
+          console.log("No appointments found.");
         }
-      } catch (e) {
-        console.error("Error fetching appointments:", e);
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
       }
     };
-  
-    fetchAppointments();
-  }, [doctor]);
 
+    fetchAppointments();
+  }, [doctorState, setDoctorAppointments]);
+
+  // Start Video Call
   const startVideoCall = (appointmentId, patientName) => {
-    setIdentity(doctor.name); // Doctor's identity
-    setRoomName(`room_${appointmentId}`); // Create a unique room name based on appointment ID
-    setIsVideoCallActive(true); // Activate the video call UI
+    setIdentity(doctorState.name);
+    setRoomName(`room_${appointmentId}`);
+    setIsVideoCallActive(true);
   };
 
+  // Close Video Call
   const closeVideoCall = () => {
-    setIsVideoCallActive(false); // Close the video call
+    setIsVideoCallActive(false);
   };
 
   return (
@@ -73,93 +77,41 @@ const DoctorDashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {!doctor ? (
-          <h2 className="text-2xl font-bold text-red-600">
-            Loading Doctor Data...
-          </h2>
+        {!doctorState ? (
+          <h2 className="text-2xl font-bold text-red-600">Loading Doctor Data...</h2>
         ) : (
           <>
             {/* Doctor Details */}
-            <h2 className="text-4xl font-bold text-blue-600">{doctor.name}</h2>
-            <p className="text-xl text-gray-500 mb-6">{doctor.specialization}</p>
+            <h2 className="text-4xl font-bold text-blue-600">{doctorState.name}</h2>
+            <p className="text-xl text-gray-500 mb-6">{doctorState.specialization || "Specialization N/A"}</p>
 
             {/* Doctor Info Table */}
             <div className="w-full mb-6">
               {[
-                { label: "📧 Email", value: doctor.email },
-                { label: "📞 Phone", value: doctor.number },
-                { label: "🔢 License Number", value: doctor.licenseNumber },
-                { label: "🏆 Experience", value: `${doctor.Experience} years` },
-                { label: "📚 Publications", value: doctor.publications },
+                { label: "📧 Email", value: doctorState.email },
+                { label: "📞 Phone", value: doctorState.number },
+                { label: "🔢 License Number", value: doctorState.licenseNumber },
+                { label: "🏆 Experience", value: `${doctorState.Experience} years` },
+                { label: "📚 Publications", value: doctorState.publications },
               ].map((item, index) => (
                 <div
                   key={index}
                   className="flex justify-between border-b border-gray-300 py-3 text-lg"
                 >
-                  <span className="font-semibold text-gray-700">
-                    {item.label}:
-                  </span>
+                  <span className="font-semibold text-gray-700">{item.label}:</span>
                   <span className="text-gray-900">{item.value || "N/A"}</span>
                 </div>
               ))}
             </div>
 
-            {/* Dashboard Sections */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-              {/* Upcoming Appointments */}
-              <div className="p-4 bg-gray-100 rounded-lg shadow-sm">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-3">
-                  📅 Upcoming Appointments
-                </h3>
-                {appointments.length > 0 ? (
-                  <ul className="list-disc pl-5 text-gray-700">
-                    {appointments.map((appt, index) => (
-                      <li key={index} className="mb-2 border-b pb-2">
-                        <strong>Patient:</strong> {appt.appointmentWith} <br />
-                        <strong>Date:</strong> {appt.appointmentAt} <br />
-                        <strong>Time:</strong> {appt.timeSlot} <br />
-                        <button
-                          onClick={() => startVideoCall(appt.appointmentId, appt.appointmentWith)}
-                          className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 mt-2 rounded-lg hover:bg-blue-600 transition"
-                        >
-                          <FaVideo /> Join Call
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-700">No upcoming appointments.</p>
-                )}
-              </div>
-
-              {/* Patient List */}
-              <div className="p-4 bg-gray-100 rounded-lg shadow-sm">
-                <h3 className="text-2xl font-semibold text-blue-600 mb-3">
-                  👨‍⚕️ Patient List
-                </h3>
-                {patients.length > 0 ? (
-                  <ul className="list-disc pl-5 text-gray-700">
-                    {patients.map((patient, index) => (
-                      <li key={index}>{patient}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-700">No registered patients.</p>
-                )}
-              </div>
-            </div>
+            {/* Appointments Section */}
+            
           </>
         )}
       </motion.div>
 
       {/* Video Call Component */}
-      {isVideoCallActive && (
-        <VideoCall
-          roomName={roomName}
-          identity={identity}
-          onClose={closeVideoCall}
-        />
-      )}
+      {isVideoCallActive && <VideoCall roomName={roomName} identity={identity} onClose={closeVideoCall} />}
     </div>
   );
 };

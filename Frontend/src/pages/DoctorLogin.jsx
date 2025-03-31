@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import {ChatbotContext} from '../context/ChatbotContext';
 // import { useAuth } from "../contexts/AuthContext";
-import { useUser } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContext";
 
 const DoctorLogin = () => {
   const {user,setUser} = useContext(ChatbotContext);
@@ -11,7 +11,7 @@ const DoctorLogin = () => {
   const [password, setPassword] = useState("");
   const [doctor, setDoctor] = useState();
   const navigate = useNavigate();
-    const { handleSetUser } = useUser();
+    const { handleSetUser } = useContext(AuthContext);
   
 //   const handleChange = (e) => {
 //     setFormData({ ...formData, [e.target.name]: e.target.value });
