@@ -48,8 +48,10 @@ const Appointment = () => {
   }, [user]);
 
   const startVideoCall = () => {
-    setIdentity(appointment.appointmentWith);
-    setRoomName(`room_${appointment._id}`);
+    console.log("appoint ment:",appointment);
+    
+    setIdentity(appointment.name);
+    setRoomName(`room_${appointment.name}`);
     setIsVideoCallActive(true);
   };
 

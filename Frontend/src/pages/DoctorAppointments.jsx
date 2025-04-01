@@ -1,12 +1,17 @@
 import { useEffect, useState, useContext } from "react";
 import { ChatbotContext } from "../context/ChatbotContext";
 import { FaVideo } from "react-icons/fa";
+import VideoCall from "../components/VideoCall"; // Assuming you have a VideoCall component
 
 const DoctorAppointments = () => {
   const { doctorAppointments } = useContext(ChatbotContext);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
+  const [roomName, setRoomName] = useState("");
+  const [patientName, setPatientName] = useState("");
+  const [identity, setIdentity] = useState(""); // Add identity state
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -25,7 +30,8 @@ const DoctorAppointments = () => {
           date,
           time: doctorAppointments.timeSlot?.[index] || "Time Not Set",
         }));
-
+        console.log("appoint dtaa at docrtor:",structuredAppointments);
+        
         setAppointments(structuredAppointments);
       } catch (error) {
         setError("Error processing appointments.");
@@ -38,8 +44,23 @@ const DoctorAppointments = () => {
     fetchAppointments();
   }, [doctorAppointments]);
 
-  const startVideoCall = (appointmentId) => {
-    console.log(`Starting video call for appointment: ${appointmentId}`);
+  const startVideoCall = (patientName) => {
+    // Set the room name and patient info for the video call
+    const room = `room_${patientName}`; // Unique room name for each appointment
+    setRoomName(room);
+    setPatientName(patientName);
+    setIdentity(`Dr_${doctorAppointments.name}`); // Assuming doctor name is available in doctorAppointments
+    console.log("Room Name Set:", room);
+    console.log("Identity Set:", `Dr_${doctorAppointments.name}`);
+    setIsVideoCallActive(true); // Activate video call view
+  };
+
+  const closeVideoCall = () => {
+    setIsVideoCallActive(false);
+    setRoomName("");
+    setPatientName("");
+    setIdentity(""); // Reset identity when closing video call
+    console.log("Video Call Closed");
   };
 
   return (
@@ -58,7 +79,7 @@ const DoctorAppointments = () => {
               <p><strong>Date:</strong> {appt.date}</p>
               <p><strong>Time:</strong> {appt.time}</p>
               <button
-                onClick={() => startVideoCall(appt.id)}
+                onClick={() => startVideoCall(appt.patient)}
                 className="mt-2 flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
               >
                 <FaVideo /> Start Video Call
@@ -68,6 +89,15 @@ const DoctorAppointments = () => {
         </ul>
       ) : (
         <p className="text-gray-500">No upcoming appointments.</p>
+      )}
+
+      {/* Video Call Component */}
+      {isVideoCallActive && (
+        <VideoCall
+          roomName={roomName}
+          identity={identity} // Pass the identity prop
+          onClose={closeVideoCall}
+        />
       )}
     </div>
   );
