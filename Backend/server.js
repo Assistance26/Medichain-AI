@@ -74,55 +74,6 @@ app.post("/send-email", async (req, res) => {
     }
 });
 
-// // Video Call Token Generation
-// app.post('/api/token', async (req, res) => {
-//     console.log("Received token request:", req.body);
-    
-//     const { appointmentId, userType, userName } = req.body;
-    
-//     // Validate required parameters
-//     if (!appointmentId || !userType || !userName) {
-//         console.error("Missing required parameters:", { appointmentId, userType, userName });
-//         return res.status(400).json({ 
-//             error: 'Missing required parameters',
-//             required: ['appointmentId', 'userType', 'userName']
-//         });
-//     }
-    
-//     try {
-//         // Generate a unique room name based on appointment ID
-//         const roomName = `appointment_1`;
-        
-//         // Generate identity based on user type
-//         const identity = userType === 'doctor' ? `Dr_${userName}` : userName;
-        
-//         console.log("Generating token for:", { roomName, identity });
-        
-//         // Create a new AccessToken instance
-//         const token = new AccessToken(twilioAccountSid, twilioApiKey, twilioApiSecret, { identity });
-        
-//         // Add a Video grant to the token
-//         token.addGrant(new VideoGrant({ room: roomName }));
-        
-//         // Generate the JWT token
-//         const jwtToken = token.toJwt();
-        
-//         res.json({ 
-//             success: true,
-//             token: jwtToken, 
-//             roomName, 
-//             identity 
-//         });
-//     } catch (error) {
-//         console.error('Error generating token:', error);
-//         res.status(500).json({ 
-//             success: false,
-//             error: 'Failed to generate token',
-//             details: error.message 
-//         });
-//     }
-// });
-
 app.post('/api/token', async (req, res) => {
     console.log("🔍 Received token request:", req.body);
 
@@ -138,8 +89,8 @@ app.post('/api/token', async (req, res) => {
     }
 
     try {
-        // ✅ Fixed roomName (should use dynamic appointment ID)
-        const roomName = `appointment_1`;
+        // ✅ Dynamically generate roomName based on appointmentId
+        const roomName = `appointment_${appointmentId}`;
 
         // ✅ Generate identity correctly
         const identity = userType === 'doctor' ? `Dr_${userName}` : userName;
@@ -180,6 +131,7 @@ app.post('/api/token', async (req, res) => {
         });
     }
 });
+
 
 
 app.get('/login', async(req, res) => {
@@ -450,6 +402,9 @@ app.post('/appointment', async (req, res) => {
         res.status(500).json({ status: "Internal Server Error" });
     }
 });
+
+  
+
 
 app.get('/allUsers', async (req, res) => {
     const fetch = await User.find();
