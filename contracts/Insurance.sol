@@ -1,44 +1,106 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.21;
 
 contract Insurance {
-    address public insurer;
-    uint256 public policyCount = 0;
+    struct PolicyHolder {
+        address buyer;
+        uint lastPaymentTimestamp;
+        bool claimed;
+    }
 
     struct Policy {
-        uint256 policyId;
-        address policyHolder;
-        uint256 premium;
-        uint256 coverageAmount;
-        bool isClaimed;
-        string ipfsHash; // IPFS Hash of policy document
+        uint id;
+        string name;
+        uint price;
+        uint coverageAmount;
+        string coverage;
+        uint premiumDuration;
     }
 
-    mapping(uint256 => Policy) public policies;
-
-    event PolicyCreated(uint256 policyId, address policyHolder, uint256 premium, uint256 coverageAmount, string ipfsHash);
-    event PolicyClaimed(uint256 policyId, address policyHolder);
+    uint public policyCount = 0;
+    mapping(uint => Policy) public policies;
+    // Map policy ID to buyer address to PolicyHolder details
+    mapping(uint => mapping(address => PolicyHolder)) public policyHolders;
+    address public admin;
 
     constructor() {
-        insurer = msg.sender;
+        admin = msg.sender;
     }
 
-    modifier onlyInsurer() {
-        require(msg.sender == insurer, "Only insurer can perform this action.");
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Only admin can call this.");
         _;
     }
 
-    function createPolicy(address _policyHolder, uint256 _premium, uint256 _coverageAmount, string memory _ipfsHash) public onlyInsurer {
-        policyCount++;
-        policies[policyCount] = Policy(policyCount, _policyHolder, _premium, _coverageAmount, false, _ipfsHash);
-        emit PolicyCreated(policyCount, _policyHolder, _premium, _coverageAmount, _ipfsHash);
+    modifier onlyPolicyHolder(uint _id) {
+        require(policyHolders[_id][msg.sender].buyer != address(0), "Not a policy holder.");
+        _;
     }
 
-    function claimPolicy(uint256 _policyId) public {
-        Policy storage policy = policies[_policyId];
-        require(policy.policyHolder == msg.sender, "You are not the policyholder.");
-        require(!policy.isClaimed, "Policy already claimed.");
-        policy.isClaimed = true;
-        emit PolicyClaimed(_policyId, msg.sender);
+    function createPolicy(
+        string memory _name, 
+        uint _price, 
+        uint _coverageAmount, 
+        string memory _coverage, 
+        uint _premiumDuration
+    ) public onlyAdmin {
+        policyCount++;
+        policies[policyCount] = Policy(
+            policyCount, 
+            _name, 
+            _price, 
+            _coverageAmount, 
+            _coverage, 
+            _premiumDuration
+        );
+    }
+
+    function buyPolicy(uint _id) public payable {
+        Policy storage policy = policies[_id];
+        require(msg.value >= policy.price, "Not enough Ether to buy this policy.");
+        require(policyHolders[_id][msg.sender].buyer == address(0), "You already own this policy.");
+        
+        policyHolders[_id][msg.sender] = PolicyHolder(
+            msg.sender,
+            block.timestamp,
+            false
+        );
+    }
+
+    function payPremium(uint _id) public payable onlyPolicyHolder(_id) {
+        Policy storage policy = policies[_id];
+        PolicyHolder storage holder = policyHolders[_id][msg.sender];
+        require(!holder.claimed, "Policy has already been claimed.");
+        
+        uint nextDueDate = holder.lastPaymentTimestamp + policy.premiumDuration;
+        require(block.timestamp >= nextDueDate, "Premium payment is not yet due.");
+        require(msg.value >= policy.price, "Not enough Ether to pay the premium.");
+
+        holder.lastPaymentTimestamp = block.timestamp;
+    }
+
+    function claimPolicy(uint _id) public onlyPolicyHolder(_id) {
+        Policy storage policy = policies[_id];
+        PolicyHolder storage holder = policyHolders[_id][msg.sender];
+        require(!holder.claimed, "Policy already claimed.");
+        require(address(this).balance >= policy.coverageAmount, "Not enough funds in contract to pay coverage.");
+
+        holder.claimed = true;
+        payable(msg.sender).transfer(policy.coverageAmount);
+    }
+
+    function isOverdue(uint _id, address _buyer) public view returns (bool) {
+        PolicyHolder storage holder = policyHolders[_id][_buyer];
+        require(holder.buyer != address(0), "Not a policy holder");
+        uint nextDueDate = holder.lastPaymentTimestamp + policies[_id].premiumDuration;
+        return block.timestamp > nextDueDate;
+    }
+
+    function getContractBalance() public view onlyAdmin returns (uint) {
+        return address(this).balance;
+    }
+
+    function withdrawFunds() public onlyAdmin {
+        payable(admin).transfer(address(this).balance);
     }
 }

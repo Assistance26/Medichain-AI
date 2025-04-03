@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useEffect, useState, useContext } from "react";
 import { ChatbotContext } from "../context/ChatbotContext";
@@ -118,5 +117,3 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
-
-

@@ -28,11 +28,16 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import DoctorAppointments from "./pages/DoctorAppointments";
 import UnifiedSignup from './pages/UnifiedSignup.jsx';
+import { BlockchainProvider } from "./context/BlockchainContext.jsx";
+import WalletConnection from "./pages/WalletConnection.jsx";
+import PatientPolicyList from "./pages/PatientPolicyList.jsx";
+import PatientPolicyDetails from "./pages/PatientPolicyDetails.jsx";
 
 function AppContent() {
   const { user } = useAuth();
 
   return (
+    <BlockchainProvider>
     <ChatbotProvider>
       {user?.role === "doctor" ? (
         <DoctorLayout>
@@ -74,12 +79,18 @@ function AppContent() {
             <Route path="/cost-planning" element={<ProtectedRoute><CostPlanning /></ProtectedRoute>} />
             <Route path="/symptom-checker" element={<ProtectedRoute><SymptomChecker /></ProtectedRoute>} />
             <Route path="/chatbot" element={<ProtectedRoute><Chatbot /></ProtectedRoute>} />
+            <Route path="/connect-wallet" element={<ProtectedRoute><WalletConnection /></ProtectedRoute>} />
+            <Route path="/policies" element={<ProtectedRoute><PatientPolicyList /></ProtectedRoute>} />
+            <Route path="/my-policies" element={<ProtectedRoute><PatientPolicyDetails /></ProtectedRoute>} />
+            
             
             <Route path="*" element={<NotFound />} />
           </Routes>
         </MainLayout>
       )}
     </ChatbotProvider>
+    </BlockchainProvider>
+
   );
 }
 

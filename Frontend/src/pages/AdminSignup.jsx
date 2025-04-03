@@ -68,15 +68,15 @@ const AdminSignup = () => {
           required
         />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded-md"
-          required
-        />
+      <input
+        type="password"
+        name="password"
+        placeholder="Password"
+        value={formData.password}
+        onChange={handleChange}
+        className="w-full p-2 mb-3 border rounded-md"
+        required
+      />
 
         <button type="submit" className="bg-blue-500 text-white w-full p-2 rounded-md">
           Sign Up
