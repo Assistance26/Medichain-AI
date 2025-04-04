@@ -13,11 +13,9 @@ import About from "./pages/About";
 import Services from "./pages/Services";
 import Doctors from "./pages/Doctors";
 import DoctorProfile from "./pages/DoctorProfile";
-//import DoctorRegistration from "./pages/DoctorRegistration"; // ✅ Ensure this file exists
 import Appointment from "./pages/Appointment";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
-//import Signup from "./pages/Signup"; // ✅ Ensure this file exists
 import HealthScore from "./pages/HealthScore";
 import CostPlanning from "./pages/CostPlanning";
 import SymptomChecker from "./pages/SymptomChecker";
